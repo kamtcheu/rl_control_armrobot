@@ -1,0 +1,14 @@
+Funktionale Requirements:
+	- Präzision: Hauptziel sub_5mm, starting with sub_10mm and aiming sub_02mm(if possible)
+	- Pfad zu folgen: Hauptziel: halbe Ellipse, andere Kurven könnten wenn zeitlich mögich erforscht werden
+	- root mean square error (RMSE) minimieren (sub_05mm)
+	- Tracking-Fehler minimieren (sub_05mm, um RMSE zu folgen)
+	- Kollisionsfreiheit: keine selbst Kollision
+	- Beschleunigung/Geschwindigkeit: Glatt und sanft
+	- Übertragbarkeit(Sim-To-Real) 
+
+
+
+Nicht-Funktionale Requirements:
+	- Inferenzzeit(aktuell)
+	- Taskzeit
