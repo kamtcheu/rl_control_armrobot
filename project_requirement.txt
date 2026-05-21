@@ -12,3 +12,6 @@ Nicht-Funktionale Requirements:
 	- Inferenzzeit(aktuell)
 	- Taskzeit
 	- Kollisionsfreiheit: keine selbst Kollision
+
+Präzision Referenzen:  RL for PID-Based Control in Robotic Catheter System(Vessel cathetrisation, ) -> 0.003 +/- 0.0058 mm
+Reinforcement learning‑based intelligent trajectory tracking(No indication on Workspace Limitation) -> 0.07(spiral-shape) - 0.09(helical-shaped) [no unit mentioned]
