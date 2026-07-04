@@ -3,7 +3,7 @@ from gymnasium import utils
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium.spaces import Box
 import os
-
+from trajectory import elliptical_trajectory
 
 # you can completely modify this class for your MuJoCo environment by following the directions
 class ArmRobot(MujocoEnv, utils.EzPickle):
@@ -20,7 +20,7 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
     def __init__(self, episode_len=500, **kwargs):
         utils.EzPickle.__init__(self, **kwargs)
         # change shape of observation to your observation space size
-        observation_space = Box(low=-np.inf, high=np.inf, shape=(10,), dtype=np.float64)
+        observation_space = Box(low=-np.inf, high=np.inf, shape=(54,), dtype=np.float64)
         # load your MJCF model with env and choose frames count between actions
         MujocoEnv.__init__(
             self,
@@ -31,7 +31,16 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         )
         self.step_number = 0
         self.episode_len = episode_len
-
+        self.init_qpos = None#self.model.key_qpos[0].copy()
+        self.target_path, self.target_orientations = elliptical_trajectory()
+        self.current_pos = self.target_path[0]
+        self.visited_points = [False] * len(self.target_path)
+        self.visited_points[0] = True
+        self.current_target_index = 1
+        
+    @property
+    def current_target_pos(self):
+        return self.target_path[self.current_target_index]
     # determine the reward depending on observation or other properties of the simulation
     def step(self, a):
         reward = 1.0
@@ -42,6 +51,11 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         done = bool(not np.isfinite(obs).all() or (obs[2] < 0))
         truncated = self.step_number > self.episode_len
         return obs, reward, done, truncated, {}
+        
+    def reward(self, obs):
+        # example reward function, you can change it to your needs
+        reward = 1.0 - np.linalg.norm(obs[:3])
+        return reward
 
     # define what should happen when the model is reset (at the beginning of each episode)
     def reset_model(self):
@@ -60,10 +74,13 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
     # determine what should be added to the observation
     # for example, the velocities and positions of various joints can be obtained through their names, as stated here
     def _get_obs(self):
-        obs = np.concatenate((np.array(self.data.joint("ball").qpos[:3]),
-                              np.array(self.data.joint("ball").qvel[:3]),
-                              np.array(self.data.joint("rotate_x").qpos),
-                              np.array(self.data.joint("rotate_x").qvel),
-                              np.array(self.data.joint("rotate_y").qpos),
-                              np.array(self.data.joint("rotate_y").qvel)), axis=0)
+        site_id = self.model.site("attachment_site").id
+        self.current_pos = self.data.site(site_id).xpos
+        obs = np.concatenate(np.array(self.current_pos),
+                             np.array(self.current_target_pos),
+                              np.array(self.data.qpos),
+                              np.array(self.data.qvel),
+                              np.array(self.data.ctrl),
+                              
+                                axis=0)
         return obs
