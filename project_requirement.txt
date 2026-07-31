@@ -15,3 +15,8 @@ Nicht-Funktionale Requirements:
 
 Präzision Referenzen:  RL for PID-Based Control in Robotic Catheter System(Vessel cathetrisation, ) -> 0.003 +/- 0.0058 mm
 Reinforcement learning‑based intelligent trajectory tracking(No indication on Workspace Limitation) -> 0.07(spiral-shape) - 0.09(helical-shaped) [no unit mentioned]
+
+Feature im State Space,Warum es wichtig ist
+Aktuelle Gelenkwinkel (q),"Pflicht! Ohne q weiß das Netz nicht, in welcher geometrischen Konfiguration sich der Arm befindet, und kann keine passenden Gelenkbefehle berechnen."
+Gelenkgeschwindigkeiten (q˙​),"Hilft dem Agenten, Schwingungen zu dämpfen und die Trägheit des Arms einzuschätzen."
+Relativer Lookahead (TCP-Frame),Die relativen Positionen und Zielvektoren der nächsten k Punkte (wie im vorherigen Schritt berechnet).

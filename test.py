@@ -103,9 +103,12 @@ def fk_ur3e(q):
 
 # Example usage
 if __name__ == "__main__":
-    q = np.array([0, -1.51, 1.51, -1.51, -1.51, 0])
+    init_joints_degrees =[0]*6# [-10.042, -93.752, -63.163, -109.568, 76.181, -11.005]
+    init_joints_grad = [angle * np.pi / 180 for angle in init_joints_degrees]
+    #init_joints_grad[0]=-np.pi/2
+    
 
-    T = fk_ur3e(q)
+    T = fk_ur3e(init_joints_grad)
 
     print("T_base_tcp =")
     print(np.round(T, 6))

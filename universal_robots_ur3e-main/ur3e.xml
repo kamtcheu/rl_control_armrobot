@@ -64,18 +64,18 @@
 
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="wrist_3_link" pos="0 -1 2"/>
-    <body name="base" childclass="ur3e" quat="0 0 0 -1">
+    <body name="base" childclass="ur3e" pos="-0.405 -0.25 0.555" euler="0 1.5708 1.5708">
       <inertial mass="2" pos="0 0 0" diaginertia="0.0030532 0.0030532 0.005625"/>
       <geom mesh="base_0" material="jointgray" class="visual"/>
       <geom mesh="base_1" material="black" class="visual"/>
-      <body name="shoulder_link" pos="0 0 0.152">
+      <body name="shoulder_link" pos="0 0 0.15185" euler="0 0 3.14159">
         <inertial mass="2" pos="0 0 0" diaginertia="0.00809316 0.00809316 0.005625"/>
         <joint name="shoulder_pan_joint" class="size2" axis="0 0 1"/>
         <geom mesh="shoulder_0" material="urblue" class="visual"/>
         <geom mesh="shoulder_1" material="black" class="visual"/>
         <geom mesh="shoulder_2" material="jointgray" class="visual"/>
         <geom class="collision" size="0.047 0.05" pos="0 0 -0.032"/>
-        <body name="upper_arm_link" pos="0 0.12 0" quat="1 0 1 0">
+        <body name="upper_arm_link" pos="0 0.12 0" euler = "0 0 0">
           <inertial mass="3.42" pos="0 0 0.122" diaginertia="0.0217285 0.0217285 0.00961875"/>
           <joint name="shoulder_lift_joint" class="size2"/>
           <geom mesh="upperarm_0" material="black" class="visual"/>
@@ -84,7 +84,7 @@
           <geom mesh="upperarm_3" material="linkgray" class="visual"/>
           <geom class="collision" size="0.046 0.06" pos="0 -0.04 0" quat="1 1 0 0"/>
           <geom class="collision" size="0.038 0.11" pos="0 0 0.12"/>
-          <body name="forearm_link" pos="0 -0.093 0.244">
+          <body name="forearm_link" pos="0 -0.093 0.24355">
             <inertial mass="1.26" pos="0 0 0.10625" diaginertia="0.00654457 0.00654457 0.00354375"/>
             <joint name="elbow_joint" class="size1_limited"/>
             <geom mesh="forearm_0" material="urblue" class="visual"/>
@@ -93,7 +93,7 @@
             <geom mesh="forearm_3" material="jointgray" class="visual"/>
             <geom class="collision" size="0.038 0.048" pos="0 0.062 0" quat="1 1 0 0"/>
             <geom class="collision" size="0.032 0.103" pos="0 0 0.11"/>
-            <body name="wrist_1_link" pos="0.0005 0 0.2125" quat="1 0 1 0">
+            <body name="wrist_1_link" pos="0.0005 0 0.2132" quat="1 0 1 0">
               <inertial mass="0.8" pos="0 0.104 0" diaginertia="0.00225 0.002085 0.002085"/>
               <joint name="wrist_1_joint" class="size0"/>
               <geom mesh="wrist1_0" material="jointgray" class="visual"/>
@@ -101,19 +101,31 @@
               <geom mesh="wrist1_2" material="black" class="visual"/>
               <geom class="collision" size="0.032 0.05" pos="0 0.045 0" quat="1 1 0 0"/>
               <body name="wrist_2_link" pos="0 0.104 0">
-                <inertial mass="0.8" pos="0 0 0.085" diaginertia="0.00225 0.002085 0.002085"/>
+                <inertial mass="0.8" pos="0 0 0.08535" diaginertia="0.00225 0.002085 0.002085"/>
                 <joint name="wrist_2_joint" axis="0 0 1"/>
                 <geom mesh="wrist2_0" material="jointgray" class="visual"/>
                 <geom mesh="wrist2_1" material="black" class="visual"/>
                 <geom mesh="wrist2_2" material="urblue" class="visual"/>
                 <geom class="collision" size="0.032 0.05" pos="0 0 0.035"/>
                 <geom class="collision" size="0.032 0.027" pos="0 0.01 0.085" quat="1 1 0 0"/>
-                <body name="wrist_3_link" pos="0 0 0.085">
-                  <inertial mass="0.35" pos="0 0.0715 0" quat="1 0 0 1" diaginertia="0.0001792 0.000136267 0.000136267"/>
+                <body name="wrist_3_link" pos="0 0 0.08535">
+                  <inertial mass="0.261" pos="0 0.0715 0" quat="1 0 0 1" diaginertia="0.0001792 0.000136267 0.000136267"/>
                   <joint name="wrist_3_joint"/>
                   <geom mesh="wrist3" material="linkgray" class="visual"/>
                   <geom class="eef_collision" size="0.032 0.023" pos="0 0.07 0" quat="1 1 0 0"/>
-                  <site name="attachment_site" pos="0 0.09215 0" quat="1 0 0 0"/>
+                  <body name="tool0" pos="0 0.0921 0" euler = "0 0 1.5708" >
+                    
+                    <!-- <inertial mass="1.8" pos="0 0 0.06" diaginertia="0.005350 0.005500 0.000640"/>
+                    <geom name="my_cylinder" 
+                          type="cylinder" 
+                          size="0.005 0.143865"
+                          pos="0.143865 0 0"
+                          zaxis="1 0 0"
+                          rgba="0.2 0.6 0.8 1" /> -->
+                    <geom name="site_visual" type="sphere" size="0.005"  zaxis="1 0 0" pos=" 0.28773 0.00001 -0.00064" rgba="1 0 0 1"/>
+                    <site name="attachment_site" quat="1 0 0 0"/>
+                    <site name="tcp_site" pos="0.28773 0.00001 -0.00064 "  zaxis="1 0 0"/>
+                  </body>
                 </body>
               </body>
             </body>
@@ -122,17 +134,17 @@
       </body>
     </body>
 
-    <body name="box" pos="-.1 -0.4 .3">
+    <!--body name="box" pos="-.25 -0.3 .2" quat="0 0 0 -1"-->
       <!--joint name="rotate_x" pos="0 0 0" axis="1 0 0" range="-.25 .25" damping="20" /-->
       <!--joint name="rotate_y" pos="0 0 0" axis="0 1 0" range="-.25 .25" damping="20" /-->
-      <geom name="box" type="box" size="0.1 0.1 0.1" rgba="1 0 0 0.2" contype="0" conaffinity="0" group="1"/>
+      <!--geom name="box" type="box" size="0.1 0.1 0.1" rgba="1 0 0 0.2" contype="0" conaffinity="0" group="1"/-->
       <!--geom name="cube_geom" type="box" size="0.1 0.1 0.1" material="matcube" 
                   contype="0" conaffinity="0" group="1"/-->
-    </body>
-    <body name="my_visual_ellipse" pos="-0.1 -0.3 0.3">
+    <!--/body-->
+    <body name="my_visual_ellipse" pos="-0.289997 0.006666 0.247185" quat="0 0 0 -1">
             <!-- size attributes define the semi-axes (X Y Z radius) -->
             <!-- contype/conaffinity 0 ensures other objects pass right through it -->
-            <geom name="ellipse_geom" type="ellipsoid" size="0.05 0.04 0.00001" rgba="0 0.5 1 0.2" 
+            <geom name="ellipse_geom" type="ellipsoid" size="0.005 0.003 0.001" rgba="0 0.5 1 0.2" 
                   contype="0" conaffinity="0" group="1"/>
     </body>
   </worldbody>
@@ -147,7 +159,7 @@
   </actuator>
 
   <keyframe>
-    <key name="home" qpos="0 -0.5 -2.0 1.2 0.06 -0.75" ctrl="0 -0.5 -2.0 1.2 0.06 -0.75"/>
+    <key name="home" qpos="0 -0.5 -2.0 1.2 -3.2 -0.75" ctrl="0 -0.5 -2.0 1.2 -3.2 -0.75"/>
   </keyframe>
 </mujoco>
 <!-- -1.5708 -1.5708 1.5708 -1.5708 -1.5708 0.0 -->
