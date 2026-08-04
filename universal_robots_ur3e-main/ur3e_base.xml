@@ -124,7 +124,7 @@
                           rgba="0.2 0.6 0.8 1" /> -->
                     <geom name="site_visual" type="sphere" size="0.005"  pos="-0.00064 0.00001 0.28773" rgba="1 0 0 1"/>
                     <site name="attachment_site"/>
-                    <site name="tcp_site" pos=" -0.00064 0.00001 0.28773"/>
+                    <site name="needle_holder_site" pos=" -0.00064 0.00001 0.28773"/>
                   </body>
                 </body>
               </body>

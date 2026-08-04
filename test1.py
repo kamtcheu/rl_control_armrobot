@@ -9,7 +9,7 @@ model = mujoco.MjModel.from_xml_path('./universal_robots_ur3e-main/scene.xml')
 #model.nu = 0.1
 data = mujoco.MjData(model)
 print(model.nu)
-site_id = model.site("tcp_site").id
+site_id = model.site("needle_holder_site").id
 tool_id = model.site("attachment_site").id
 wrist_3_id = model.body("wrist_3_link").id
 wrist_joint_id = model.joint("wrist_3_joint").id
@@ -17,7 +17,9 @@ base_id = model.body("base").id
 trail = []
 MAX_POINTS = 500
 time.sleep(15)  
-ellip,_, _, needl, _ = elliptical_trajectory(N=19, show_plot=False)
+ellip, needl = elliptical_trajectory(N=19, show_plot=False)
+ellip = ellip[0]*1e-3
+needl = needl[0]*1e-3
 #ellip = ellip*1e-3
 print(ellip)
 ellip2 = [np.array([ellip[0,i], ellip[1,i], ellip[2,i]]) for i in range(ellip.shape[1])]

@@ -154,51 +154,51 @@ N_base = N_base / np.linalg.norm(N_base, axis=0)  # Normalize the normal vector
 N = N / np.linalg.norm(N, axis=0)  # Normalize the normal vector
 #print(np.dot(T[:, 0], N[:, 0], ))
 print("ecllipse_center_base: ", T_global2base @ np.append(elipse_center_global, 1.0).reshape(4, 1))
-# # -------------------------------------------------------------------------
-# # 5. Plotting Generation (3 Subplots matching MATLAB figure 1)
-# # -------------------------------------------------------------------------
-# fig = plt.figure(figsize=(18, 6))
+# -------------------------------------------------------------------------
+# 5. Plotting Generation (3 Subplots matching MATLAB figure 1)
+# -------------------------------------------------------------------------
+fig = plt.figure(figsize=(18, 6))
 
-# # Subplot 1: Target Needle Tip
-# ax1 = fig.add_subplot(1, 3, 1, projection='3d')
-# ax1.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
-# ax1.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-# ax1.set_title('Target Needle Tip\n(global pos + global orient)')
-# ax1.set_xlabel('x_t')
-# ax1.set_ylabel('y_t')
-# ax1.set_zlabel('z_t')
-# #ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
-# ax1.grid(True)
+# Subplot 1: Target Needle Tip
+ax1 = fig.add_subplot(1, 3, 1, projection='3d')
+ax1.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
+ax1.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
+ax1.set_title('Target Needle Tip\n(global pos + global orient)')
+ax1.set_xlabel('x_t')
+ax1.set_ylabel('y_t')
+ax1.set_zlabel('z_t')
+#ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
+ax1.grid(True)
 
-# # Subplot 2: Target TCP
-# ax2 = fig.add_subplot(1, 3, 2, projection='3d')
-# ax2.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
-# ax2.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-# ax2.plot3D(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], 'y', linewidth=2)
-# ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-# ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='g', length=0.2)
-# ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], N[0, :], N[1, :], N[2, :], color='b', length=0.2)
-# ax2.set_title('Target tcp\n(global position)')
-# ax2.set_xlabel('x_tcp')
-# ax2.set_ylabel('y_tcp')
-# ax2.set_zlabel('z_tcp')
-# ax2.grid(True)
+# Subplot 2: Target TCP
+ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+ax2.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
+ax2.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
+ax2.plot3D(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], 'y', linewidth=2)
+ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
+ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='g', length=0.2)
+ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], N[0, :], N[1, :], N[2, :], color='b', length=0.2)
+ax2.set_title('Target tcp\n(global position)')
+ax2.set_xlabel('x_tcp')
+ax2.set_ylabel('y_tcp')
+ax2.set_zlabel('z_tcp')
+ax2.grid(True)
 
-# # Subplot 3: Required Base Position
-# ax3 = fig.add_subplot(1, 3, 3, projection='3d')
-# ax3.plot3D(P_base[0, :], P_base[1, :], P_base[2, :], 'b', linewidth=2)
-# ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_base[0, :], O_base[1, :], O_base[2, :], color='r', length=0.2)
-# ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_t_base[0, :], O_t_base[1, :], O_t_base[2, :], color='g', length=0.2)
-# ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], N_base[0, :], N_base[1, :], N_base[2, :], color='y', length=0.2)
-# ax3.set_title('Required Base\nposition and orientation')
-# ax3.set_xlabel('x_base')
-# ax3.set_ylabel('y_base')
-# ax3.set_zlabel('z_base')
-# ax3.grid(True)
+# Subplot 3: Required Base Position
+ax3 = fig.add_subplot(1, 3, 3, projection='3d')
+ax3.plot3D(P_base[0, :], P_base[1, :], P_base[2, :], 'b', linewidth=2)
+ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_base[0, :], O_base[1, :], O_base[2, :], color='r', length=0.2)
+ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_t_base[0, :], O_t_base[1, :], O_t_base[2, :], color='g', length=0.2)
+ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], N_base[0, :], N_base[1, :], N_base[2, :], color='y', length=0.2)
+ax3.set_title('Required Base\nposition and orientation')
+ax3.set_xlabel('x_base')
+ax3.set_ylabel('y_base')
+ax3.set_zlabel('z_base')
+ax3.grid(True)
 
-# plt.tight_layout()
-# plt.ion()
-# plt.show(block=False)
+plt.tight_layout()
+plt.ion()
+plt.show(block=False)
 #%%
 
 #%%

@@ -3,8 +3,8 @@ import gymnasium as gym
 from stable_baselines3 import SAC
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
-
-from rl_control_armrobot.trajectory_env import ArmRobot
+from stable_baselines3.common.callbacks import CheckpointCallback
+from trajectory_env import ArmRobot
 
 
 class SACAgentManager:
@@ -35,11 +35,26 @@ class SACAgentManager:
             tensorboard_log=self.log_dir
         )
 
-    def train(self, total_timesteps: int = 100_000, tb_log_name: str = "sac_run"):
+
+
+        # Configure the callback to only save the model weights
+        self.checkpoint_callback = CheckpointCallback(
+            save_freq=10000,           # Save every 10,000 timesteps
+            save_path="./sac_eval_checkpoints/", 
+            name_prefix="sac_eval",
+            save_replay_buffer=False   # Keeps file sizes small for manual evaluation
+        )
+
+    def train(self, total_timesteps: int = 100_000, tb_log_name: str = "sac_run", 
+              save_checkpoints: bool = True):
         """Trainiert den Agenten und loggt via TensorBoard."""
         print(f"Starte Training für {total_timesteps} Schritte...")
+
+        
+
         self.model.learn(
             total_timesteps=total_timesteps, 
+            callback=self.checkpoint_callback if save_checkpoints else None,
             tb_log_name=tb_log_name,
             progress_bar=True
         )
@@ -94,7 +109,7 @@ if __name__ == "__main__":
     assert custom_train_env.observation_space == custom_eval_env.observation_space, "Beide Umgebungen müssen denselben Observation Space haben!"
     assert custom_train_env.action_space == custom_eval_env.action_space, "Beide Umgebungen müssen denselben Action Space haben!"
     assert custom_train_env.metadata == custom_eval_env.metadata, "Beide Umgebungen müssen dieselben Metadaten haben!"
-    assert custom_train_env.model_path == custom_eval_env.model_path, "Beide Umgebungen müssen dasselbe MuJoCo-Modell verwenden!"
+    assert custom_train_env.fullpath == custom_eval_env.fullpath, "Beide Umgebungen müssen dasselbe MuJoCo-Modell verwenden!"
     assert custom_train_env.frame_skip == custom_eval_env.frame_skip, "Beide Umgebungen müssen denselben Frame Skip haben!"
     assert custom_train_env.current_pos is not None and custom_eval_env.current_pos is not None, "Beide Umgebungen müssen initialisierte Positionen haben! please check the reset_model() method in your ArmRobot class."
     assert custom_train_env.current_target_pos is not None and custom_eval_env.current_target_pos is not None, "Beide Umgebungen müssen initialisierte Zielpositionen haben! Please check the reset_model() method in your ArmRobot class."
