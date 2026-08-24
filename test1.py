@@ -25,7 +25,7 @@ print(ellip)
 ellip2 = [np.array([ellip[0,i], ellip[1,i], ellip[2,i]]) for i in range(ellip.shape[1])]
 needl2 = [np.array([needl[0,i], needl[1,i], needl[2,i]]) for i in range(needl.shape[1])]
 print(ellip2)
-init_joints_degrees = [0]*6#[-10.042, -93.752, -63.163, -109.568, 76.181, -11.005]
+init_joints_degrees = np.array([-21.58, -97.97, -66.38, -106.18, 88.76, -21.74])#[0]*6#[-10.042, -93.752, -63.163, -109.568, 76.181, -11.005]
 init_joints_grad = [angle * np.pi / 180 for angle in init_joints_degrees]
 #init_joints_grad[0] = -np.pi/2
         

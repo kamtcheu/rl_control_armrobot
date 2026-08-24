@@ -3,9 +3,55 @@ import gymnasium as gym
 from stable_baselines3 import SAC
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import CallbackList, BaseCallback, CheckpointCallback
 from trajectory_env import ArmRobot
+import sys
+os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+os.environ["MUJOCO_GL"] = "glfw" 
+os.environ["RICH_JUPYTER"] = "0"
 
+# Increase the default limit (usually 1000) to 10,000
+#sys.setrecursionlimit(10000) 
+
+# record_mean accumulates a running average since the 
+# last flush — that's what you want for a per-step value, 
+# since SB3 flushes to TensorBoard automatically every 
+# rollout (PPO) or every N episodes (SAC/TD3), not every
+# single step. Use plain record only for values you want
+# overwritten rather than averaged.
+class RewardComponentsCallback(BaseCallback):
+    """Logs the components from ArmRobot._get_reward()/info dict to TensorBoard."""
+    def __init__(self, verbose=0):
+        super().__init__(verbose)
+
+    def _on_step(self) -> bool:
+        
+        infos = self.locals.get("infos", {})
+        for info in infos:  # one dict per parallel env
+            self.logger.record_mean("reward/position",         info["reward_position"])
+            self.logger.record_mean("reward/orientation",      info["reward_orientation"])
+            self.logger.record_mean("reward/progress",         info["reward_progress"])
+            self.logger.record_mean("reward/control_cost",     info["reward_control_cost"])
+            self.logger.record_mean("reward/orientation_cost", info["orientation_cost"])
+            self.logger.record_mean("reward/bonus",            info["bonus_current_target_reached"])
+            self.logger.record_mean("reward/penalty",          info["penalty_leaving_workspace"])
+            self.logger.record_mean("task/pos_err",            info["pos_err"])
+            self.logger.record_mean("task/ori_err",            info["ori_err"])
+            self.logger.record_mean("task/current_target_idx", info["current_target_idx"])
+        return True
+class TensorboardCallback(BaseCallback):
+    def __init__(self, verbose=0):
+        super().__init__(verbose)
+
+    def _on_step(self) -> bool:
+        # Access info from the training environment
+        infos = self.locals.get("infos", [])
+        for info in infos:
+            if "position_error" in info:
+                # Log to TensorBoard
+                self.logger.record("custom/position_error", info["position_error"])
+                self.logger.record("custom/orientation_error", info["orientation_error"])
+        return True
 
 class SACAgentManager:
     """
@@ -16,11 +62,12 @@ class SACAgentManager:
         self, 
         train_env: gym.Env, 
         log_dir: str = "./tb_logs", 
-        model_dir: str = "./saved_models"
+        model_dir: str = "./saved_models",
+        name_p: str = ""
     ):
         self.log_dir = log_dir
         self.model_dir = model_dir
-        
+        self.name_p = name_p
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.model_dir, exist_ok=True)
         
@@ -35,31 +82,34 @@ class SACAgentManager:
             tensorboard_log=self.log_dir
         )
 
-
+        self.reward_callback = RewardComponentsCallback()
 
         # Configure the callback to only save the model weights
         self.checkpoint_callback = CheckpointCallback(
-            save_freq=10000,           # Save every 10,000 timesteps
+            save_freq=20000,           # Save every 500,000 timesteps
             save_path="./sac_eval_checkpoints/", 
-            name_prefix="sac_eval",
+            name_prefix=f"{self.name_p}_sac_eval",
             save_replay_buffer=False   # Keeps file sizes small for manual evaluation
         )
 
-    def train(self, total_timesteps: int = 100_000, tb_log_name: str = "sac_run", 
-              save_checkpoints: bool = True):
+    def train(self, total_timesteps: int = 100_000, tb_log_name: str = f"sac_run_env", 
+              save_checkpoints: bool = True, log_reward: bool = True):
         """Trainiert den Agenten und loggt via TensorBoard."""
         print(f"Starte Training für {total_timesteps} Schritte...")
 
-        
-
+        callback_list = []
+        if save_checkpoints:
+            callback_list.append(self.checkpoint_callback)
+        if log_reward:
+            callback_list.append(self.reward_callback)
         self.model.learn(
             total_timesteps=total_timesteps, 
-            callback=self.checkpoint_callback if save_checkpoints else None,
+            callback=CallbackList(callback_list) if len(callback_list)>0 else None,
             tb_log_name=tb_log_name,
             progress_bar=True
         )
         
-        save_path = os.path.join(self.model_dir, "sac_model")
+        save_path = os.path.join(self.model_dir, f"{self.name_p}_sac_model_env")
         self.model.save(save_path)
         print(f"Modell erfolgreich unter '{save_path}' gespeichert.")
 
@@ -101,23 +151,23 @@ if __name__ == "__main__":
     
     # Wichtig: Da wir zwei separate Instanzen brauchen (eine fürs Training, eine für die Evaluation),
     # instanziieren wir deine Umgebung hier zweimal.
-    
-    custom_train_env = ArmRobot()
-    custom_eval_env = ArmRobot()
-
-    assert custom_train_env is not custom_eval_env, "Trainings- und Evaluationsumgebung müssen unterschiedliche Instanzen sein!"
-    assert custom_train_env.observation_space == custom_eval_env.observation_space, "Beide Umgebungen müssen denselben Observation Space haben!"
-    assert custom_train_env.action_space == custom_eval_env.action_space, "Beide Umgebungen müssen denselben Action Space haben!"
-    assert custom_train_env.metadata == custom_eval_env.metadata, "Beide Umgebungen müssen dieselben Metadaten haben!"
-    assert custom_train_env.fullpath == custom_eval_env.fullpath, "Beide Umgebungen müssen dasselbe MuJoCo-Modell verwenden!"
-    assert custom_train_env.frame_skip == custom_eval_env.frame_skip, "Beide Umgebungen müssen denselben Frame Skip haben!"
-    assert custom_train_env.current_pos is not None and custom_eval_env.current_pos is not None, "Beide Umgebungen müssen initialisierte Positionen haben! please check the reset_model() method in your ArmRobot class."
-    assert custom_train_env.current_target_pos is not None and custom_eval_env.current_target_pos is not None, "Beide Umgebungen müssen initialisierte Zielpositionen haben! Please check the reset_model() method in your ArmRobot class."
+    gym.register(id="my_master_envs/ArmRobot-v4", entry_point="trajectory_env4:ArmRobot")
+    custom_train_env = gym.make("my_master_envs/ArmRobot-v4") #ArmRobot(render_mode="human")#
+    # custom_eval_env = gym.make("my_master_envs/ArmRobot-v2", render_mode="human") #ArmRobot(render_mode="human")#
+    #custom_eval_env.render_mode = "human"  # Setze den Render-Modus für die Evaluationsumgebung
+    # assert custom_train_env is not custom_train_env, "Trainings- und Evaluationsumgebung müssen unterschiedliche Instanzen sein!"
+    # assert custom_train_env.observation_space == custom_train_env.observation_space, "Beide Umgebungen müssen denselben Observation Space haben!"
+    # assert custom_train_env.action_space == custom_train_env.action_space, "Beide Umgebungen müssen denselben Action Space haben!"
+    # assert custom_train_env.metadata == custom_train_env.metadata, "Beide Umgebungen müssen dieselben Metadaten haben!"
+    # assert custom_train_env.fullpath == custom_eval_env.fullpath, "Beide Umgebungen müssen dasselbe MuJoCo-Modell verwenden!"
+    # assert custom_train_env.frame_skip == custom_eval_env.frame_skip, "Beide Umgebungen müssen denselben Frame Skip haben!"
+    # assert custom_train_env.current_pos is not None and custom_eval_env.current_pos is not None, "Beide Umgebungen müssen initialisierte Positionen haben! please check the reset_model() method in your ArmRobot class."
+    # assert custom_train_env.current_target_pos is not None and custom_eval_env.current_target_pos is not None, "Beide Umgebungen müssen initialisierte Zielpositionen haben! Please check the reset_model() method in your ArmRobot class."
     # Manager mit der Instanz deiner Custom-Umgebung füttern
-    manager = SACAgentManager(train_env=custom_train_env)
+    manager = SACAgentManager(train_env=custom_train_env,name_p="nolook_env4")
     
     # Trainieren
-    manager.train(total_timesteps=50_000, tb_log_name="nadel_env_run")
+    manager.train(total_timesteps=1_000_000, tb_log_name="nadel_env4_run")
     
     # Evaluieren mit der separaten Custom-Instanz
-    manager.evaluate(eval_env=custom_eval_env, n_eval_episodes=5)
+    #manager.evaluate(eval_env=custom_eval_env, n_eval_episodes=5)

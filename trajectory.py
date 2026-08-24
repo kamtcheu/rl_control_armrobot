@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # -------------------------------------------------------------------------
 # 1. Geometry and Configuration Constants
@@ -11,9 +11,9 @@ Rn = 12
 theta_h = +90 / 180 * np.pi
 
 # Note: Keeping your large numbers intact from the MATLAB script
-elipse_center_global = np.array([[-289.997], [+6.666], [+247.185]])  # Convert mm to meters
+elipse_center_global = np.array([[-335.00], [-10], [+297.00]]) #np.array([[-289.997], [+6.666], [+247.185]])  # Convert mm to meters
 
-N = 19  # Number of points to generate, matching MATLAB's 180:10:360
+N = 15  # Number of points to generate, matching MATLAB's 180:10:360
 # theta = np.linspace(180, 360, N) * np.pi / 180  # Convert degrees to radians
 # theta_start = theta[0]
 # theta_end = theta[-1]
@@ -153,7 +153,7 @@ N_base = N_base / np.linalg.norm(N_base, axis=0)  # Normalize the normal vector
 #N = np.cross([T[0, 0], T[1, 0], T[2, 0]], [BiNor[0, 0], BiNor[1, 0], BiNor[2, 0]]) #np.array([[1],[0],[0]])
 N = N / np.linalg.norm(N, axis=0)  # Normalize the normal vector
 #print(np.dot(T[:, 0], N[:, 0], ))
-print("ecllipse_center_base: ", T_global2base @ np.append(elipse_center_global, 1.0).reshape(4, 1))
+print("ellipse_center_base: ", T_global2base @ np.append(elipse_center_global, 1.0).reshape(4, 1))
 # # -------------------------------------------------------------------------
 # # 5. Plotting Generation (3 Subplots matching MATLAB figure 1)
 # # -------------------------------------------------------------------------
@@ -204,7 +204,7 @@ print("ecllipse_center_base: ", T_global2base @ np.append(elipse_center_global, 
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, elipse_center_global=np.array([[-289.997], [+6.666], [+247.185]]), N=19, show_plot=False):
+def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, ellipse_center_global=np.array([[-289.997], [+6.666], [+247.185]]), N=19, show_plot=False):
     """
     Generates an elliptic trajectory for a robotic arm based on predefined parameters.
     
@@ -326,7 +326,7 @@ def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, elipse_center_g
         P_t_base[:, i] = P_t_base_homogen[0:3].flatten()
         O_t_base[:, i] = (R_global2base @ O_t[:, i : i + 1]).flatten()
         
-        print("ecllipse_center_base: ", T_global2base @ np.append(elipse_center_global, 1.0).reshape(4, 1))
+        print("ellipse_center_base: ", T_global2base @ np.append(ellipse_center_global, 1.0).reshape(4, 1))
         # Matching MATLAB index criteria (1-based > 10 maps to 0-based >= 10)
         if i >= 10:
             delta_z += 0 * 0.2
@@ -344,45 +344,45 @@ def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, elipse_center_g
     # -------------------------------------------------------------------------
     # 5. Plotting Generation (3 Subplots matching MATLAB figure 1)
     # -------------------------------------------------------------------------
-    if show_plot:
-        fig = plt.figure(figsize=(18, 6))
+    # if show_plot:
+    #     fig = plt.figure(figsize=(18, 6))
 
-        # Subplot 1: Target Needle Tip
-        ax1 = fig.add_subplot(1, 3, 1, projection='3d')
-        ax1.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
-        ax1.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-        ax1.set_title('Target Needle Tip\n(global pos + global orient)')
-        ax1.set_xlabel('x_t')
-        ax1.set_ylabel('y_t')
-        ax1.set_zlabel('z_t')
-        #ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
-        ax1.grid(True)
+    #     # Subplot 1: Target Needle Tip
+    #     ax1 = fig.add_subplot(1, 3, 1, projection='3d')
+    #     ax1.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
+    #     ax1.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
+    #     ax1.set_title('Target Needle Tip\n(global pos + global orient)')
+    #     ax1.set_xlabel('x_t')
+    #     ax1.set_ylabel('y_t')
+    #     ax1.set_zlabel('z_t')
+    #     #ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
+    #     ax1.grid(True)
 
-        # Subplot 2: Target TCP
-        ax2 = fig.add_subplot(1, 3, 2, projection='3d')
-        ax2.plot3D(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], 'b', linewidth=2)
-        ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.2)
-        ax2.set_title('Target tcp\n(global position)')
-        ax2.set_xlabel('x_tcp')
-        ax2.set_ylabel('y_tcp')
-        ax2.set_zlabel('z_tcp')
-        ax2.grid(True)
+    #     # Subplot 2: Target TCP
+    #     ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+    #     ax2.plot3D(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], 'b', linewidth=2)
+    #     ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.2)
+    #     ax2.set_title('Target tcp\n(global position)')
+    #     ax2.set_xlabel('x_tcp')
+    #     ax2.set_ylabel('y_tcp')
+    #     ax2.set_zlabel('z_tcp')
+    #     ax2.grid(True)
 
-        # Subplot 3: Required Base Position
-        ax3 = fig.add_subplot(1, 3, 3, projection='3d')
-        ax3.plot3D(P_base[0, :], P_base[1, :], P_base[2, :], 'b', linewidth=2)
-        ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_base[0, :], O_base[1, :], O_base[2, :], color='r', length=0.2)
-        ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_t_base[0, :], O_t_base[1, :], O_t_base[2, :], color='g', length=0.2)
-        ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], N_base[0, :], N_base[1, :], N_base[2, :], color='y', length=0.2)
-        ax3.set_title('Required Base\nposition and orientation')
-        ax3.set_xlabel('x_base')
-        ax3.set_ylabel('y_base')
-        ax3.set_zlabel('z_base')
-        ax3.grid(True)
+    #     # Subplot 3: Required Base Position
+    #     ax3 = fig.add_subplot(1, 3, 3, projection='3d')
+    #     ax3.plot3D(P_base[0, :], P_base[1, :], P_base[2, :], 'b', linewidth=2)
+    #     ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_base[0, :], O_base[1, :], O_base[2, :], color='r', length=0.2)
+    #     ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_t_base[0, :], O_t_base[1, :], O_t_base[2, :], color='g', length=0.2)
+    #     ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], N_base[0, :], N_base[1, :], N_base[2, :], color='y', length=0.2)
+    #     ax3.set_title('Required Base\nposition and orientation')
+    #     ax3.set_xlabel('x_base')
+    #     ax3.set_ylabel('y_base')
+    #     ax3.set_zlabel('z_base')
+    #     ax3.grid(True)
 
-        plt.tight_layout()
-        plt.ion()
-        plt.show()
+    #     plt.tight_layout()
+    #     plt.ion()
+    #     plt.show()
 
     return tuple([P_tcp, O_t2tcp, O_tcp, N]), tuple([P_base, O_t_base, O_base, N_base])
 # %%
