@@ -123,7 +123,7 @@ os.environ["QT_QPA_PLATFORM"] = "offscreen"
 from theEnv import ArmRobot
 # os.environ["DISPLAY"] = "0"
 # # os.environ["MUJOCO_GL"] = "egl"
-model_path = "sac_eval_checkpoints/nolook_envOne_sac_eval_440000_steps" 
+model_path = "sac_eval_checkpoints/nolook_envOne_sac_eval_500000_steps" 
 
 # 2. Initialize the environment with human rendering
 # render_mode="human" automatically opens a window and renders each step
