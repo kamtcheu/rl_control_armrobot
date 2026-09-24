@@ -65,10 +65,10 @@ def clean_null_noise(arr, null_threshold=1e-8):
 # you can completely modify this class for your MuJoCo environment by following the directions
 
 DEFAULT_CAMERA_CONFIG = {
-    "trackbodyid": 2,
-    "distance": 3.0,
-    "lookat": np.array((0.0, 0.0, 1.15)),
-    "elevation": -20.0,
+    "lookat": np.array([0.02, 0.03, 0.19]),
+    "distance": 0.45,
+    "azimuth": 4,
+    "elevation": -18,
 }
 
 class ArmRobot(MujocoEnv, utils.EzPickle):

@@ -66,24 +66,28 @@ class SACAgentManager:
         train_env: gym.Env, 
         log_dir: str = "./tb_logs", 
         model_dir: str = "./saved_models",
-        name_p: str = ""
+        name_p: str = "",
+        loadmodel: bool = False
     ):
         self.log_dir = log_dir
         self.model_dir = model_dir
         self.name_p = name_p
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.model_dir, exist_ok=True)
-        
+        self.modelpath = os.path.join(model_dir, f"{name_p}_sac_model_env")
         # Die eigene Umgebung direkt in einen Monitor einpacken (wichtig für SB3 TensorBoard Logs)
         self.env = Monitor(train_env)
-        
+        self.loadmodel = loadmodel
         # SAC-Modell initialisieren
-        self.model = SAC(
-            policy="MlpPolicy", 
-            env=self.env, 
-            verbose=1, 
-            tensorboard_log=self.log_dir
-        )
+        if not self.loadmodel:
+            self.model = SAC(
+                policy="MlpPolicy", 
+                env=self.env, 
+                verbose=1, 
+                tensorboard_log=self.log_dir
+            )
+        else:
+          self.model = SAC.load(self.modelpath, env=self.env)
 
         self.reward_callback = RewardComponentsCallback()
 
@@ -109,6 +113,7 @@ class SACAgentManager:
             total_timesteps=total_timesteps, 
             callback=CallbackList(callback_list) if len(callback_list)>0 else None,
             tb_log_name=tb_log_name,
+            reset_num_timesteps=(not self.loadmodel),
             progress_bar=True
         )
         
@@ -167,7 +172,7 @@ if __name__ == "__main__":
     # assert custom_train_env.current_pos is not None and custom_eval_env.current_pos is not None, "Beide Umgebungen müssen initialisierte Positionen haben! please check the reset_model() method in your ArmRobot class."
     # assert custom_train_env.current_target_pos is not None and custom_eval_env.current_target_pos is not None, "Beide Umgebungen müssen initialisierte Zielpositionen haben! Please check the reset_model() method in your ArmRobot class."
     # Manager mit der Instanz deiner Custom-Umgebung füttern
-    manager = SACAgentManager(train_env=custom_train_env,name_p="nolook_envOne")
+    manager = SACAgentManager(train_env=custom_train_env,name_p="nolook_envOne", loadmodel=True)
     
     # Trainieren
     manager.train(total_timesteps=1_000_000, tb_log_name="nadel_envOne_run")

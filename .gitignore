@@ -3,6 +3,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+sac_eval_checkpoints/
+tb_logs/
+*.mp4
+*.exe
 # C extensions
 *.so
 
