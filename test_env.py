@@ -129,6 +129,7 @@ model_path = "sac_eval_checkpoints/nolook_envTr35_sac_eval_6000000_steps"
 # 2. Initialize the environment with human rendering
 # render_mode="human" automatically opens a window and renders each step
 env = ArmRobot(render_mode="human",episode_len=250, num_points=35)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
+
 #env = gym.make(env_name, render_mode="human")
 # gym.register(id="my_master_envs/ArmRobot-v4", entry_point="trajectory_env4:ArmRobot")
 # env = gym.make("my_master_envs/ArmRobot-v4", null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.50, start_target_idx=0, max_joint_delta = 0.5, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)

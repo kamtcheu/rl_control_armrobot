@@ -159,8 +159,8 @@ if __name__ == "__main__":
     
     # Wichtig: Da wir zwei separate Instanzen brauchen (eine fürs Training, eine für die Evaluation),
     # instanziieren wir deine Umgebung hier zweimal.
-    gym.register(id="my_master_envs/ArmRobot-One", entry_point="theEnv:ArmRobot")
-    custom_train_env = gym.make("my_master_envs/ArmRobot-One") #ArmRobot(render_mode="human")#
+    gym.register(id="my_master_envs/ArmRobot-One250", entry_point="theEnv:ArmRobot")
+    custom_train_env = gym.make("my_master_envs/ArmRobot-One250") #ArmRobot(render_mode="human")#
     # custom_eval_env = gym.make("my_master_envs/ArmRobot-v2", render_mode="human") #ArmRobot(render_mode="human")#
     #custom_eval_env.render_mode = "human"  # Setze den Render-Modus für die Evaluationsumgebung
     # assert custom_train_env is not custom_train_env, "Trainings- und Evaluationsumgebung müssen unterschiedliche Instanzen sein!"
@@ -172,10 +172,12 @@ if __name__ == "__main__":
     # assert custom_train_env.current_pos is not None and custom_eval_env.current_pos is not None, "Beide Umgebungen müssen initialisierte Positionen haben! please check the reset_model() method in your ArmRobot class."
     # assert custom_train_env.current_target_pos is not None and custom_eval_env.current_target_pos is not None, "Beide Umgebungen müssen initialisierte Zielpositionen haben! Please check the reset_model() method in your ArmRobot class."
     # Manager mit der Instanz deiner Custom-Umgebung füttern
+    
     manager = SACAgentManager(train_env=custom_train_env,name_p="nolook_envOne", loadmodel=True)
+
     
     # Trainieren
-    manager.train(total_timesteps=1_000_000, tb_log_name="nadel_envOne_run")
+    manager.train(total_timesteps=1_000_000, tb_log_name="nadel_envOne250_run")
     
     # Evaluieren mit der separaten Custom-Instanz
     #manager.evaluate(eval_env=custom_eval_env, n_eval_episodes=5)

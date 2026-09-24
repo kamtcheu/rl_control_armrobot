@@ -87,6 +87,7 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
     # eps_pos is in meters and eps_ori is in degrees
     # max_joint_delta represents the max allowed angle adjustement per step and is in in degrees
     def __init__(self,null_threshold=1e-8, work_box_size=0.05, threshold_pos=50e-6, threshold_ori=1.50, start_target_idx=0, max_joint_delta = 0.4, render_mode=None, site_name="needle_holder_site", episode_len=400, num_points=20, **kwargs):
+
         utils.EzPickle.__init__(self, **kwargs)
         # change shape of observation to your observation space size
         observation_space = Box(low=-np.inf, high=np.inf, shape=(34,), dtype=np.float64)
