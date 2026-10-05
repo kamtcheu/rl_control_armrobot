@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.mujoco import MujocoEnv
@@ -117,18 +119,39 @@ from gymnasium.utils import EzPickle
 # %%
 import gymnasium as gym
 import imageio
+import mujoco
 from stable_baselines3 import SAC 
 import os
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
-from theEnv3 import ArmRobot
-from trajectory import T_tcp2t, R_tcp2t
+from theEnv31 import ArmRobot
+from trajectory1 import T_tcp2t, R_tcp2t
 # os.environ["DISPLAY"] = "0"
 # # os.environ["MUJOCO_GL"] = "egl"
-model_path = "sac_eval_checkpoints/nolook_envTr35_sac_eval_6000000_steps" 
+
+def interpolate_joint_trajectory(q_start, q_goal, T, dt):
+    q_start = np.asarray(q_start)
+    q_goal = np.asarray(q_goal)
+
+    times = np.arange(0, T + dt, dt)
+
+    trajectory = []
+
+    for t in times:
+        tau = np.clip(t / T, 0.0, 1.0)
+
+        # Quintic time scaling
+        s = 10*tau**3 - 15*tau**4 + 6*tau**5
+
+        q = q_start + s * (q_goal - q_start)
+
+        trajectory.append(q)
+
+    return np.array(trajectory)
+model_path = "sac_eval_checkpoints/nolook_envTv33_sac_eval_1860000_steps" 
 
 # 2. Initialize the environment with human rendering
 # render_mode="human" automatically opens a window and renders each step
-env = ArmRobot(render_mode="human",episode_len=250, num_points=35)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
+env = ArmRobot(render_mode="human", qpos_noise=False,episode_len=200, num_points=20)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
 
 #env = gym.make(env_name, render_mode="human")
 # gym.register(id="my_master_envs/ArmRobot-v4", entry_point="trajectory_env4:ArmRobot")
@@ -139,7 +162,7 @@ env = ArmRobot(render_mode="human",episode_len=250, num_points=35)#null_threshol
 # Note: Ensure you import the exact algorithm class you used for training
 print(f"Loading model from {model_path}...")
 model = SAC.load(os.path.abspath(model_path), env=env)
-
+best_action = False
 # 4. Evaluation Loop
 num_episodes = 10
 positions = []
@@ -168,7 +191,7 @@ for ep in range(num_episodes):
     ori_error.append(float(info["cos_theta"]))
 
     # Run the episode until the agent dies (done) or hits the time limit (truncated)
-    while not (done):# or truncated):
+    while not (done or truncated):#):# 
         # Predict the action to take. 
         # deterministic=True is usually best for testing/evaluating trained agents.
         action, _states = model.predict(obs, deterministic=True)
@@ -182,15 +205,58 @@ for ep in range(num_episodes):
         orientation_int.append(info["R_int"])
         ori_error.append(float(info["cos_theta"]))
         cross_error_vec.append(float(info["cross_error_vec"]))
+    if best_action:
+        actions = env.best_actions_list.copy()
+        best_steps = env.best_step_number_l.copy()
+        print("Action's list: ", env.best_actions_list)
+        print("stepnumber's list: ", env.best_step_number_l)
+        obs, info = env.reset()
+        timest=0
+        total_trajectory = []
+        a_ = env.data.qpos[:6].copy()
+        total_trajectory.append(a_)
+        for num, a in enumerate(actions):
+            #obs, reward, done, truncated, info = env.step(a)
+            #env.do_simulation(a, env.frame_skip)
+            #if timest == 0:
+            # env.data.qpos[:6] = a
+            # mujoco.mj_forward(env.model, env.data)
+
+            # if env.render_mode == "human":
+            #     env.render()
+            #     time.sleep(0.3)
+            #else:
+            dt_ = 0.1
+            if num/10 <= 0.5 or num/10 >= 1.5:
+                dt_ = 0.2
+            else:
+                dt_ = 0.4
+            tr = interpolate_joint_trajectory(a_, a, T=0.5, dt=dt_)
+            for q in tr[1:]:
+                total_trajectory.append(q)
+            a_ = a
+        for q in total_trajectory:
+            env.data.qpos[:6] = q
+            mujoco.mj_forward(env.model, env.data)
+            if env.render_mode == "human":
+                env.render()
+                #time.sleep(0.01)
+            #timest += 1
+        position = [position[i] for i in best_steps]
+        orientation = [orientation[i] for i in best_steps]
+        orientation_int = [orientation_int[i] for i in best_steps]
+        ori_error = [ori_error[i] for i in best_steps]
+        cross_error_vec = [cross_error_vec[i] for i in best_steps]
+
         
         #frames.append(env.render())
     print(len(list(range(len(cross_error_vec)))))
     print(len(cross_error_vec))
     assert len(position)>0 and len(position) == len(orientation) == len(cross_error_vec), "Lengths of positions, orientations, and cross_error_vecs do not match."
     import matplotlib.pyplot as plt
-    import numpy as np
+    import numpy as np 
     fig = plt.figure(figsize=(18, 6))
-    filt=5
+    filt=1
     #positions = #[np.array([ 240.18, -243.96,   66.58]), np.array([ 241.03, -244.4 ,   67.4 ]), np.array([ 251.54, -242.12,   74.57]), np.array([ 251.49, -242.08,   74.89]), np.array([ 245.88, -240.06,   67.53]), np.array([ 246.56, -241.35,   68.41]), np.array([ 249.17, -242.81,   72.98]), np.array([ 247.45, -243.74,   71.88]), np.array([ 246.3 , -245.03,   70.76]), np.array([ 246.93, -245.6 ,   70.4 ]), np.array([ 246.98, -245.96,   70.02]), np.array([ 246.99, -245.98,   70.01]), np.array([ 247.27, -246.77,   70.03]), np.array([ 247.17, -246.84,   70.08]), np.array([ 247.15, -246.87,   70.01]), np.array([ 247.16, -246.84,   70.04]), np.array([ 247.17, -246.84,   70.01]), np.array([ 247.18, -246.82,   70.03]), np.array([ 247.16, -246.82,   70.02]), np.array([ 247.13, -246.79,   70.  ]), np.array([ 247.13, -246.78,   69.99]), np.array([ 247.14, -246.77,   70.  ]), np.array([ 247.14, -246.76,   70.  ]), np.array([ 247.17, -246.77,   70.02]), np.array([ 247.16, -246.75,   70.01]), np.array([ 247.18, -246.76,   70.  ]), np.array([ 247.16, -246.76,   69.99]), np.array([ 247.13, -246.75,   69.98]), np.array([ 247.13, -246.74,   69.95]), np.array([ 247.15, -246.78,   69.96]), np.array([ 247.18, -246.78,   70.  ]), np.array([ 247.17, -246.79,   70.  ]), np.array([ 247.17, -246.81,   69.99]), np.array([ 247.17, -246.8 ,   69.99]), np.array([ 247.66, -247.45,   69.97]), np.array([ 247.59, -247.46,   70.03]), np.array([ 247.62, -247.48,   70.02]), np.array([ 247.63, -247.46,   70.04]), np.array([ 247.63, -247.47,   70.03]), np.array([ 247.64, -247.46,   70.04]), np.array([ 247.66, -247.47,   70.03]), np.array([ 247.66, -247.48,   70.03]), np.array([ 247.66, -247.46,   70.03]), np.array([ 247.64, -247.47,   70.02]), np.array([ 247.65, -247.45,   70.  ]), np.array([ 247.63, -247.46,   69.98]), np.array([ 247.63, -247.48,   70.  ]), np.array([ 247.65, -247.48,   70.  ]), np.array([ 247.66, -247.5 ,   69.99]), np.array([ 247.64, -247.49,   69.98]), np.array([ 248.29, -248.02,   70.03]), np.array([ 248.27, -248.  ,   70.05]), np.array([ 248.27, -248.  ,   70.05]), np.array([ 248.29, -248.  ,   70.05]), np.array([ 248.28, -248.  ,   70.04]), np.array([ 248.27, -248.  ,   70.03]), np.array([ 248.28, -247.98,   70.01]), np.array([ 248.28, -248.  ,   70.01]), np.array([ 248.27, -248.  ,   70.  ]), np.array([ 248.28, -248.  ,   70.  ]), np.array([ 248.25, -248.01,   69.99]), np.array([ 248.95, -248.37,   70.01]), np.array([ 248.92, -248.38,   70.02]), np.array([ 248.94, -248.36,   70.02]), np.array([ 248.93, -248.36,   70.01]), np.array([ 248.95, -248.38,   70.01]), np.array([ 248.94, -248.36,   70.01]), np.array([ 248.93, -248.38,   70.  ]), np.array([ 248.93, -248.38,   70.  ]), np.array([ 249.56, -248.64,   69.96]), np.array([ 249.58, -248.65,   69.97]), np.array([ 249.58, -248.62,   70.01]), np.array([ 249.58, -248.61,   70.01]), np.array([ 249.57, -248.62,   70.  ]), np.array([ 250.19, -248.79,   69.98]), np.array([ 250.19, -248.81,   69.99]), np.array([ 250.17, -248.78,   70.  ]), np.array([ 250.17, -248.79,   70.  ]), np.array([ 250.18, -248.78,   70.  ]), np.array([ 250.75, -248.9 ,   70.  ]), np.array([ 250.73, -248.89,   70.  ]), np.array([ 250.73, -248.89,   70.  ]), np.array([ 250.71, -248.88,   70.  ]), np.array([ 251.25, -248.94,   70.03]), np.array([ 251.24, -248.96,   70.  ]), np.array([ 251.22, -248.99,   69.98]), np.array([ 251.77, -248.98,   70.02]), np.array([ 251.78, -249.01,   70.  ]), np.array([ 251.74, -248.99,   70.01]), np.array([ 252.25, -248.98,   70.  ]), np.array([ 252.25, -248.99,   70.01]), np.array([ 252.25, -248.97,   70.  ]), np.array([ 252.76, -248.95,   70.01]), np.array([ 252.76, -248.95,   70.  ]), np.array([ 252.75, -248.96,   70.  ]), np.array([ 253.28, -248.88,   70.  ]), np.array([ 253.27, -248.89,   70.  ]), np.array([ 253.27, -248.88,   70.  ]), np.array([ 253.25, -248.88,   70.  ]), np.array([ 253.81, -248.81,   70.  ]), np.array([ 253.81, -248.77,   70.  ]), np.array([ 253.83, -248.77,   70.  ]), np.array([ 253.8 , -248.77,   70.01]), np.array([ 254.41, -248.67,   69.99]), np.array([ 254.41, -248.61,   70.  ]), np.array([ 254.42, -248.62,   70.01]), np.array([ 254.4 , -248.62,   69.99]), np.array([ 255.04, -248.4 ,   69.96]), np.array([ 255.03, -248.38,   69.97]), np.array([ 255.05, -248.38,   69.97]), np.array([ 255.06, -248.37,   70.  ]), np.array([ 255.05, -248.38,   70.  ]), np.array([ 255.1 , -248.4 ,   69.99]), np.array([ 255.69, -248.02,   70.02]), np.array([ 255.66, -248.  ,   70.  ]), np.array([ 255.68, -248.  ,   69.99]), np.array([ 255.68, -248.01,   69.99]), np.array([ 255.71, -247.99,   69.99]), np.array([ 255.71, -248.  ,   70.01]), np.array([ 255.7 , -247.99,   69.99]), np.array([ 255.73, -248.01,   70.02]), np.array([ 256.32, -247.5 ,   70.03]), np.array([ 256.3 , -247.5 ,   70.02]), np.array([ 256.3 , -247.49,   70.02]), np.array([ 256.3 , -247.49,   70.01]), np.array([ 256.31, -247.48,   69.99]), np.array([ 256.31, -247.48,   70.  ]), np.array([ 256.32, -247.46,   70.  ]), np.array([ 256.33, -247.48,   70.  ]), np.array([ 256.34, -247.46,   70.01]), np.array([ 256.34, -247.48,   70.  ]), np.array([ 256.33, -247.47,   69.99]), np.array([ 256.53, -247.39,   70.06]), np.array([ 256.82, -246.83,   70.03]), np.array([ 256.82, -246.82,   70.02]), np.array([ 256.82, -246.81,   70.03]), np.array([ 256.82, -246.82,   70.02]), np.array([ 256.81, -246.82,   70.02]), np.array([ 256.82, -246.82,   70.02]), np.array([ 256.81, -246.82,   70.01]), np.array([ 256.82, -246.8 ,   70.02]), np.array([ 256.83, -246.8 ,   70.  ]), np.array([ 256.83, -246.79,   70.01]), np.array([ 256.83, -246.78,   70.01]), np.array([ 256.83, -246.78,   70.01]), np.array([ 256.84, -246.78,   70.01]), np.array([ 256.85, -246.79,   70.01]), np.array([ 256.85, -246.81,   70.01]), np.array([ 256.8 , -246.77,   69.99]), np.array([ 257.07, -246.69,   70.05]), np.array([ 256.82, -246.79,   70.  ]), np.array([ 256.83, -246.79,   69.92]), np.array([ 256.79, -246.77,   70.  ]), np.array([ 256.84, -246.79,   69.94]), np.array([ 257.04, -245.96,   70.03]), np.array([ 257.04, -245.99,   70.03]), np.array([ 257.03, -246.01,   70.04]), np.array([ 257.02, -246.  ,   70.02]), np.array([ 257.03, -246.  ,   70.03]), np.array([ 257.03, -246.  ,   70.03]), np.array([ 257.02, -246.  ,   70.02]), np.array([ 257.02, -246.01,   70.02]), np.array([ 257.02, -246.01,   70.02]), np.array([ 257.02, -246.01,   70.01]), np.array([ 257.02, -246.01,   70.02]), np.array([ 257.03, -246.  ,   70.01]), np.array([ 257.04, -246.  ,   70.01]), np.array([ 257.04, -245.99,   70.01]), np.array([ 257.04, -245.99,   70.02]), np.array([ 257.03, -245.98,   70.02]), np.array([ 257.04, -245.98,   70.02]), np.array([ 257.05, -245.99,   70.02]), np.array([ 257.05, -245.99,   70.02]), np.array([ 257.05, -246.03,   70.02]), np.array([ 257.06, -246.05,   70.02]), np.array([ 257.05, -246.06,   70.03]), np.array([ 257.05, -246.07,   70.04]), np.array([ 257.04, -246.05,   70.04]), np.array([ 257.05, -246.05,   70.03]), np.array([ 257.05, -246.05,   70.03]), np.array([ 257.05, -246.06,   70.04]), np.array([ 257.04, -246.07,   70.03]), np.array([ 257.05, -246.06,   70.04]), np.array([ 257.04, -246.07,   70.04]), np.array([ 257.03, -246.07,   70.03]), np.array([ 257.04, -246.08,   70.03]), np.array([ 257.03, -246.08,   70.04]), np.array([ 257.03, -246.09,   70.03]), np.array([ 257.03, -246.09,   70.04]), np.array([ 257.02, -246.1 ,   70.04]), np.array([ 257.03, -246.1 ,   70.03]), np.array([ 257.02, -246.11,   70.04]), np.array([ 257.02, -246.12,   70.04]), np.array([ 257.02, -246.12,   70.05]), np.array([ 257.02, -246.12,   70.04]), np.array([ 257.01, -246.12,   70.04]), np.array([ 257.02, -246.12,   70.05]), np.array([ 257.03, -246.12,   70.04]), np.array([ 257.02, -246.13,   70.05]), np.array([ 257.02, -246.12,   70.05]), np.array([ 257.03, -246.13,   70.05]), np.array([ 257.02, -246.13,   70.05]), np.array([ 257.03, -246.13,   70.05]), np.array([ 257.02, -246.13,   70.05]), np.array([ 257.03, -246.13,   70.05]), np.array([ 257.03, -246.13,   70.05]), np.array([ 257.03, -246.13,   70.06]), np.array([ 257.03, -246.13,   70.05]), np.array([ 257.03, -246.13,   70.06]), np.array([ 257.03, -246.13,   70.05]), np.array([ 257.03, -246.13,   70.06]), np.array([ 257.04, -246.13,   70.05]), np.array([ 257.04, -246.13,   70.06]), np.array([ 257.04, -246.14,   70.06]), np.array([ 257.03, -246.13,   70.06]), np.array([ 257.04, -246.13,   70.06]), np.array([ 257.04, -246.13,   70.06]), np.array([ 257.05, -246.13,   70.06]), np.array([ 257.04, -246.13,   70.06]), np.array([ 257.04, -246.13,   70.07]), np.array([ 257.05, -246.13,   70.06]), np.array([ 257.04, -246.12,   70.06]), np.array([ 257.05, -246.13,   70.07]), np.array([ 257.05, -246.13,   70.06]), np.array([ 257.05, -246.12,   70.06]), np.array([ 257.04, -246.13,   70.07]), np.array([ 257.06, -246.13,   70.06]), np.array([ 257.05, -246.12,   70.07]), np.array([ 257.05, -246.13,   70.07]), np.array([ 257.05, -246.12,   70.06]), np.array([ 257.05, -246.12,   70.07]), np.array([ 257.05, -246.13,   70.07]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.05, -246.13,   70.07]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.05, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.06, -246.13,   70.07]), np.array([ 257.05, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.08]), np.array([ 257.05, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.08]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.08]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.06, -246.12,   70.08]), np.array([ 257.06, -246.12,   70.07]), np.array([ 257.07, -246.12,   70.08]), np.array([ 257.06, -246.12,   70.08]), np.array([ 257.06, -246.11,   70.08]), np.array([ 257.07, -246.12,   70.07]), np.array([ 257.05, -246.12,   70.08]), np.array([ 257.07, -246.12,   70.08]), np.array([ 257.06, -246.11,   70.08]), np.array([ 257.07, -246.12,   70.08]), np.array([ 257.06, -246.12,   70.08]), np.array([ 247.16, -250.63,   72.63]), np.array([ 246.76, -249.12,   71.56])]
     position = np.array([a.tolist() for i,a in enumerate(position) if i%filt==0]) # Downsample for plotting
     O_tcp = np.array([ori[:, 0] for i,ori in enumerate(orientation) if i%filt==0]).T
@@ -208,7 +274,7 @@ for ep in range(num_episodes):
     ax1.scatter3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2)
     ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.3)
     ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp_int[0, :], O_tcp_int[1, :], O_tcp_int[2, :], color='black', length=0.3)
-    ax1.quiver(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:],env.target_tangent[0, :], env.target_tangent[1,: ], env.target_tangent[ 2,:], color='black', length=0.3)
+    #ax1.quiver(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:],env.target_tangent[0, :], env.target_tangent[1,: ], env.target_tangent[ 2,:], color='black', length=0.3)
     ax1.set_title('Target Needle Tip\n(global pos + global orient)')
     ax1.set_xlabel('x_t')
     ax1.set_ylabel('y_t')
@@ -314,11 +380,12 @@ fig = plt.figure(figsize=(18, 6))
 # ax1.view_init(elev=20, azim=-80)
 # #ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
 # ax1.grid(True)
+print(cross_error_vecs[0])
 ax2 = fig.add_subplot(1, 1, 1)#, projection='3d')
 ax2.plot(list(range(max([len(vec) for vec in cross_error_vecs]))), [0.05]*max([len(vec) for vec in cross_error_vecs]), 'r--', linewidth=3)
-for i, cross_error_vec in enumerate(cross_error_vecs):
+for i, cross_error_vec in enumerate(cross_error_vecs[::-1]):
     #ax2.scatter(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1)
-    ax2.plot(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1, label=f'eps {i+1}')
+    ax2.plot(list(range(len(cross_error_vec))), [i+a for a in cross_error_vec], linewidth=1, label=f'eps {i+1}')
     
     # for j in range(len(cross_error_vec)):
     #     ax2.text(j, cross_error_vec[j], f'{cross_error_vec[j]:.2f}', fontsize=8)

@@ -399,10 +399,10 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
 
     def _get_orientation_cost(self):
         ori_cost = 0.0
-        if self.ori_err_mat[0,0] < 0 or self.ori_err_mat[1,1] < 0 or self.ori_err_mat[2,2] < 0:
-            ori_cost = 1.0 # penalty for negative diagonal elements in the orientation error matrix
-        if self.ori_err > np.deg2rad(2):
-            ori_cost += 10*np.round(self.ori_err - self.threshold_ori,4)
+        # if self.ori_err_mat[0,0] < 0 or self.ori_err_mat[1,1] < 0 or self.ori_err_mat[2,2] < 0:
+        #     ori_cost = 10.0 # penalty for negative diagonal elements in the orientation error matrix
+        if self.ori_err > np.deg2rad(5):
+            ori_cost += 100*np.round(self.ori_err - self.threshold_ori,4)
         return ori_cost
     
     def _get_orientation_reward(self):
