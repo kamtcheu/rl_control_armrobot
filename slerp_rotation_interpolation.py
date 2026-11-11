@@ -65,10 +65,10 @@ R0 = np.eye(3)
 
 # Example target orientation:
 # rotation of 100 degrees around axis [1, 1, 0.5]
-axis = np.array([1.0, 1.0, 0.5])
+axis = np.array([1.0, 0.0, 0.0])
 axis = axis / np.linalg.norm(axis)
 
-angle_deg = 00.0
+angle_deg = 90.0
 angle_rad = np.deg2rad(angle_deg)
 
 R1 = Rotation.from_rotvec(
@@ -169,4 +169,4 @@ ax.set_title(
     f"SLERP interpolation between two rotation matrices, s = {s:.2f}"
 )
 
-plt.show()
+plt.show(block=True)

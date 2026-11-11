@@ -64,7 +64,7 @@
 
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="wrist_3_link" pos="0 -1 2"/>
-    <body name="base" childclass="ur3e" pos="-0.405 -0.25 0.555" euler="0 1.5708 1.5708">
+    <body name="base" childclass="ur3e" pos="-0.40548 -0.25 0.555" euler="0 1.5708 1.5708">
       <inertial mass="2" pos="0 0 0" diaginertia="0.0030532 0.0030532 0.005625"/>
       <geom mesh="base_0" material="jointgray" class="visual"/>
       <geom mesh="base_1" material="black" class="visual"/>
@@ -147,11 +147,12 @@
       <!--geom name="cube_geom" type="box" size="0.1 0.1 0.1" material="matcube" 
                   contype="0" conaffinity="0" group="1"/-->
     <!--/body-->
-    <body name="my_visual_ellipse" pos="-0.289997 0.006666 0.247185" quat="0 0 0 -1">
+    <body name="world_center" pos="0 0 0" >
             <!-- size attributes define the semi-axes (X Y Z radius) -->
             <!-- contype/conaffinity 0 ensures other objects pass right through it -->
-            <geom name="ellipse_geom" type="ellipsoid" size="0.005 0.003 0.001" rgba="0 0.5 1 0.2" 
-                  contype="0" conaffinity="0" group="1"/>
+            <!--geom name="ellipse_geom" type="ellipsoid" size="0.005 0.003 0.001" rgba="0 0.5 1 0.2" 
+                  contype="0" conaffinity="0" group="1"/-->
+            <geom name="world_center" type="sphere" size="0.0005"  pos="0 0 0" rgba="1 1 0 1"/>
     </body>
   </worldbody>
 

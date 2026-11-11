@@ -4,6 +4,24 @@ import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium.utils import EzPickle
+import sys
+import traceback
+import signal
+
+def keyboard_interrupt_handler(sig, frame, rob1):
+    print('KeyboardInterrupt detected. Exiting.')
+    try:
+        rob1.close()
+    except NameError:
+        pass
+    # try:
+    #     rob2.close()
+    # except NameError:
+    #     pass
+    traceback.print_stack()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, lambda sig, frame: keyboard_interrupt_handler(sig, frame, rob1))
 
 # class NewStyleRobotEnv(MujocoEnv, EzPickle):
 #     # 1. Define standard Gymnasium rendering formats
@@ -123,10 +141,32 @@ import mujoco
 from stable_baselines3 import SAC 
 import os
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
-from theEnv31 import ArmRobot
-from trajectory1 import T_tcp2t, R_tcp2t
+from theEnv31 import ArmRobot, clean_null_noise, orientation_error_matrices, orientation_error_quaternions
+from trajectory1 import T_tcp2t, R_tcp2t, T_t2tcp, T_global2base
+from urx import *
+import vectorfunctions as vf
 # os.environ["DISPLAY"] = "0"
 # # os.environ["MUJOCO_GL"] = "egl"
+def draw_box(ax, x0, y0, z0, L=5, color="blue"):
+    h = L / 2
+
+    # Eight vertices of the cube
+    vertices = np.array([
+        [x0 + dx, y0 + dy, z0 + dz]
+        for dx in (-h, h)
+        for dy in (-h, h)
+        for dz in (-h, h)
+    ])
+
+    # Connect vertices differing in exactly one coordinate
+    for i in range(8):
+        for j in range(i + 1, 8):
+            if np.count_nonzero(vertices[i] != vertices[j]) == 1:
+                ax.plot(
+                    *zip(vertices[i], vertices[j]),
+                    color=color,
+                    linewidth=1.5
+                )
 
 def interpolate_joint_trajectory(q_start, q_goal, T, dt):
     q_start = np.asarray(q_start)
@@ -147,12 +187,17 @@ def interpolate_joint_trajectory(q_start, q_goal, T, dt):
         trajectory.append(q)
 
     return np.array(trajectory)
-model_path = "sac_eval_checkpoints/nolook_envTv33_sac_eval_1860000_steps" 
-
+model_path = "sac_eval_checkpoints/nolook_envTv36_sac_eval_4000000_steps" 
+robot=False
 # 2. Initialize the environment with human rendering
-# render_mode="human" automatically opens a window and renders each step
-env = ArmRobot(render_mode="human", qpos_noise=False,episode_len=200, num_points=20)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
+# render_mode="human" automatically opens a window and renders each step, np.array([[-335 - 0.07], [-10 ], [+295 + 0.014]])
+env = ArmRobot(render_mode="human",ellipse_center_g=np.array([[-335], [-10 ], [+295]]), a=5,b=3,start_target_idx=1,ori_cost=1.5,threshold_pos=50e-6, threshold_ori=1.5, max_joint_delta=0.4, qpos_noise=False,episode_len=250, num_points=20, work_box_size=0.1)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
+if robot:
+    rob1 = Robot("192.168.56.101")
+    #rob1.set_gravity((0.0, + 9.81, 0.0))
+    rob1.movej((-0.37626284, -1.71089287, -1.15919388, -1.85352342,  1.55074358, -0.37225355), vel=1.0)
 
+#env._max_joint_delta[-1]=15
 #env = gym.make(env_name, render_mode="human")
 # gym.register(id="my_master_envs/ArmRobot-v4", entry_point="trajectory_env4:ArmRobot")
 # env = gym.make("my_master_envs/ArmRobot-v4", null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.50, start_target_idx=0, max_joint_delta = 0.5, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
@@ -171,9 +216,15 @@ orientations_int = []
 ori_errors = []
 cross_error_vecs = []
 frames = []
+
 for ep in range(num_episodes):
     # Reset the environment at the start of each episode
     obs, info = env.reset()
+    p = info["current_pos"]
+    if robot:
+        rob1 = Robot("192.168.56.101")
+        rob1.movej((-0.37626284, -1.71089287, -1.15919388, -1.85352342,  1.55074358, -0.37225355), vel=1.0, acc=0.5)
+
     done = False
     truncated = False
     episode_reward = 0.0
@@ -183,6 +234,7 @@ for ep in range(num_episodes):
     ori_error = []
     cross_error_vec = []
     frames = []
+    actions = []
     print(f"Starting Episode {ep + 1}...")
     position.append(info["current_pos"])
     orientation.append(info["current_ori"])
@@ -195,16 +247,106 @@ for ep in range(num_episodes):
         # Predict the action to take. 
         # deterministic=True is usually best for testing/evaluating trained agents.
         action, _states = model.predict(obs, deterministic=True)
-        print(action)
         
+        #actions.append(action)
+        print(action)
         # Take a step in the environment
         obs, reward, done, truncated, info = env.step(action)
+        print("obs env: ", obs)
+        # if robot:
+        #     ac = np.deg2rad(np.clip(action, -1.0, 1.0) * env._max_joint_delta )
+        #     abs_ac = rob1.getj() + ac
+        #     clipped_action = np.clip(
+        #                 abs_ac, 
+        #                 env.actions_low, 
+        #                 env.actions_high
+        #     )
+        #     clipped_action = np.round(clipped_action, 4)
+        #     rob1.movej(env.data.qpos.copy(), vel=0.1, acc=0.05)
+        #     rob1_ori, rob1_pos = vf.extract_data_from_robot_pose(rob1.get_pose())
+        #     rob1_pos = np.array([a[0] for a in rob1_pos])
+        #     rob1_ori = np.array(rob1_ori) #np.array([rob1_ori[:,0], rob1_ori[:,1], rob1_ori[:,2]])
+        #     #rob1_pos = np.array([rob1.x, rob1.y, rob1.z])
+        #     print("rob1_pos: ", rob1_pos)
+
+        #     segment = env.current_segment
+        #     to_robot = rob1_pos - env.prev_target_pos
+    
+        #     segment_sq = np.dot(segment, segment)
+        #     assert segment_sq > 1e-8 , "current segment length is null. not a valid value"
+        #     #if segment_sq > 1e-8:
+        #     s = np.dot(to_robot, segment) / segment_sq
+        #     print("s: ", s)
+        #     s_clip = np.clip(s, 0.0, 1.0)
+        #     p_proj = env.prev_target_pos + s_clip * env.current_segment
+        #     deviation_error_vec = rob1_pos - p_proj
+        #     seg = np.array(segment)/np.linalg.norm(segment)
+
+        #     err_vec_pos = np.round(np.array(env.current_target_pos) - np.array(rob1_pos), 2)
+
+
+        #     #rob1_ori = np.array(rob1.get_orientation())
+        #     print("rob1_ori: ", rob1_ori)
+        #     R_des = env.interpolate_rotation(env.prev_target_ori, env.current_target_ori, s)
+        #     R_err = R_des.T @ rob1_ori
+
+        #     mat = np.dot(rob1_ori.T, env.current_target_ori)
+        #     err_mat = np.round(clean_null_noise(mat, env.null_threshold), 3)
+        #     # Access the raw dictionary of the latest packet data
+        #     joint_data = rob1.secmon.get_joint_data()
+
+        #     # Extract actual joint velocities (q')
+        #     q_prime = [
+        #         joint_data["qd_actual0"],
+        #         joint_data["qd_actual1"],
+        #         joint_data["qd_actual2"],
+        #         joint_data["qd_actual3"],
+        #         joint_data["qd_actual4"],
+        #         joint_data["qd_actual5"]
+        #     ]
+        #     obs = np.concatenate([
+        #                         # joint positions, velocities and control signals
+        #                         np.array(rob1.getj()),
+        #                         np.array(q_prime),
+        #                         # cartesian postions error
+        #                         err_vec_pos,
+        #                         np.array([s]),
+        #                         np.array(deviation_error_vec),
+        #                         seg,
+        #                         # orientation of the end effector
+        #                         np.array(err_mat[:,:2].T.flatten()),
+        #                         np.array(R_err[:,:2].T.flatten()), # 6D representation of 3 x 3 orientation (2 first column). 
+        #                                                                         #the last column must be the result of the cross product of 1st column(tangent) with second(binormal)
+        #                         #TODO: Add a look ahead mechanism
+        #                         # self.get_lookahead_target().flatten(),
+                                
+        #                         ],
+        #                         axis=0)
+        #     print("obs robot: ", obs)
         episode_reward += reward
         position.append(info["current_pos"])
         orientation.append(info["current_ori"])
         orientation_int.append(info["R_int"])
         ori_error.append(float(info["cos_theta"]))
         cross_error_vec.append(float(info["cross_error_vec"]))
+        actions.append(env.data.qpos.copy())
+        #actions.append(action)
+    print("len actions: ", len(actions))
+    if robot:
+        rob1.movejs(actions, vel=1.0, acc=0.5)
+        # for i, act in enumerate(actions):
+        #     #crtl = rob1.getj()
+        #     ac = np.deg2rad(np.clip(act, -1.0, 1.0) * env._max_joint_delta )
+        #     abs_ac = rob1.getj() + ac
+        #     clipped_action = np.clip(
+        #                 abs_ac, 
+        #                 env.actions_low, 
+        #                 env.actions_high
+        #     )
+        #     clipped_action = np.round(clipped_action, 4)
+        #     rob1.movej(clipped_action)
+        #     print("Current step positions: ", i)
+        rob1.close()
     if best_action:
         actions = env.best_actions_list.copy()
         best_steps = env.best_step_number_l.copy()
@@ -251,7 +393,7 @@ for ep in range(num_episodes):
         
         #frames.append(env.render())
     print(len(list(range(len(cross_error_vec)))))
-    print(len(cross_error_vec))
+    print(len(position))
     assert len(position)>0 and len(position) == len(orientation) == len(cross_error_vec), "Lengths of positions, orientations, and cross_error_vecs do not match."
     import matplotlib.pyplot as plt
     import numpy as np 
@@ -266,28 +408,36 @@ for ep in range(num_episodes):
     # Subplot 1: Target Needle Tip
     ax1 = fig.add_subplot(1, 3, 1, projection='3d')
     ax1.plot3D(position[:, 0], position[:, 1], position[:, 2], 'b', linewidth=2)
-    ax1.scatter3D(position[:, 0], position[:, 1], position[:, 2], 'b', linewidth=2)
+    ax1.scatter3D(position[:, 0], position[:, 1], position[:, 2], 'b', linewidth=2, label="TCP Path")
     for i in range(len(position)):
         ax1.text(position[i, 0], position[i, 1], position[i, 2], str(i), zdir='z', fontsize=8)
     #ax1.text3D(positions[:, 0], positions[:, 1], positions[:, 2], [str(i) for i in range(len(positions))], zdir='z', fontsize=8)
     ax1.plot3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2)
-    ax1.scatter3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2)
-    ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.3)
-    ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp_int[0, :], O_tcp_int[1, :], O_tcp_int[2, :], color='black', length=0.3)
+    ax1.scatter3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2, label="Target TCP Path")
+    ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.3, label="TCP Orientation")
+    ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp_int[0, :], O_tcp_int[1, :], O_tcp_int[2, :], color='black', length=0.3, label="TCP Orientation Target")
     #ax1.quiver(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:],env.target_tangent[0, :], env.target_tangent[1,: ], env.target_tangent[ 2,:], color='black', length=0.3)
-    ax1.set_title('Target Needle Tip\n(global pos + global orient)')
+    ax1.set_title('Target TCP Tip\n(pos + orient in base frame)')
     ax1.set_xlabel('x_t')
     ax1.set_ylabel('y_t')
     ax1.set_zlabel('z_t')
     ax1.set_xlim(247, 257)
     ax1.set_ylim(-253, -244)
     ax1.set_zlim(70.0, 70.4)
-
-    ax1.set_box_aspect((10, 4, 0.4))
-    ax1.view_init(elev=20, azim=-80)
+    ax1.set_box_aspect((10, 4, 1))
+    #ax1.set_box_aspect((1,1,1))
+    #ax1.view_init(elev=20, azim=-80)
     #ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
     ax1.grid(True)
 
+    # draw_box(ax1, env.world_box_center_base[0], env.world_box_center_base[1], env.world_box_center_base[2], L=0.06*1e3, color='orange')
+    ax1.scatter(env.ellipse_center_base[0], env.ellipse_center_base[1], env.ellipse_center_base[2], color="red", s=30, label="ellipse center")
+    ax1.scatter(p[0], p[1], p[2], color="green", s=30, label="start point")
+    # p = env.ellipse_center_base#T_global2base@T_t2tcp@(np.concatenate([np.array([[-289.997], [+6.666], [+297.00]]).flatten(),[1]]))
+    # ax1.scatter(p[0], p[1], p[2], color="black", s=30, label="Target")
+    # p = env.world_box_center_base#T_global2base@T_t2tcp@(np.concatenate([np.array([[-289.997], [+6.666], [+297.00]]).flatten(),[1]]))
+    # ax1.scatter(p[0], p[1], p[2], color="red", s=30, label="Target")
+    ax1.legend()
     #Subplot 2: Cross Error Vector
     ax2 = fig.add_subplot(1, 3, 3)#, projection='3d')
     ax2.plot(list(range(len(cross_error_vec))), cross_error_vec, 'b', linewidth=2)
@@ -383,9 +533,9 @@ fig = plt.figure(figsize=(18, 6))
 print(cross_error_vecs[0])
 ax2 = fig.add_subplot(1, 1, 1)#, projection='3d')
 ax2.plot(list(range(max([len(vec) for vec in cross_error_vecs]))), [0.05]*max([len(vec) for vec in cross_error_vecs]), 'r--', linewidth=3)
-for i, cross_error_vec in enumerate(cross_error_vecs[::-1]):
+for i, cross_error_vec in enumerate(cross_error_vecs):
     #ax2.scatter(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1)
-    ax2.plot(list(range(len(cross_error_vec))), [i+a for a in cross_error_vec], linewidth=1, label=f'eps {i+1}')
+    ax2.plot(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1, label=f'eps {i+1}')
     
     # for j in range(len(cross_error_vec)):
     #     ax2.text(j, cross_error_vec[j], f'{cross_error_vec[j]:.2f}', fontsize=8)

@@ -6,7 +6,7 @@ from gymnasium import utils
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium.spaces import Box
 import os
-from trajectory import elliptical_trajectory, T_global2base, elipse_center_global
+from trajectory import elliptical_trajectory, T_global2base, T_t2tcp, elipse_center_global
 from gymnasium.utils.env_checker import check_env
 from scipy.spatial.transform import Rotation as R, Slerp
 def orientation_error_matrices(R1, R2):
@@ -86,19 +86,25 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
     # eps_pos and eps_ori are the thresholds for position and orientation errors to consider the target reached
     # eps_pos is in meters and eps_ori is in degrees
     # max_joint_delta represents the max allowed angle adjustement per step and is in in degrees
-    def __init__(self,qpos_noise=False, null_threshold=1e-8, work_box_size=0.05, threshold_pos=50e-6, threshold_ori=1.50, start_target_idx=0, max_joint_delta = 0.4, render_mode=None, site_name="needle_holder_site", episode_len=200, num_points=20, **kwargs):
+    def __init__(self,a=5,b=3,ellipse_center_g=np.array([[-335.00], [-10], [+297.00]]), ori_cost=5, qpos_noise=False, null_threshold=1e-8, work_box_size=0.05, threshold_pos=50e-6, threshold_ori=1.50, start_target_idx=0, max_joint_delta = 0.4, render_mode=None, site_name="needle_holder_site", episode_len=200, num_points=20, **kwargs):
         utils.EzPickle.__init__(self, **kwargs)
         # change shape of observation to your observation space size
         observation_space = Box(low=-np.inf, high=np.inf, shape=(34,), dtype=np.float64)
-
-        self.ellipse_center_base = T_global2base@(np.concatenate([np.array(elipse_center_global).flatten(),[1]]))
+        self.ellipse_center_g = ellipse_center_g
+        offset = np.array([10,20, 0.0]) # offset in mm to the center of the ellipse in the base frame
+        self.ellipse_center_base = T_global2base@T_t2tcp@(np.concatenate([self.ellipse_center_g.flatten(), [1]]))
         self.ellipse_center_base = self.ellipse_center_base[:3] # in mm
+        self.world_box_center_base =  T_global2base@T_t2tcp@(np.concatenate([self.ellipse_center_g.flatten() + offset, [1]]))
+        self.world_box_center_base = self.world_box_center_base[:3] # in mm
         half_extents = np.array([work_box_size/2, work_box_size/2, work_box_size/2], dtype=np.float64) * 1e3 # convert in mm
         self.qpos_noise = qpos_noise
+        self.ori_cost = ori_cost
+        self.a = a
+        self.b = b
         # work space
         self.work_space = Box(
-            low=self.ellipse_center_base - half_extents,
-            high=self.ellipse_center_base + half_extents,
+            low=self.world_box_center_base - half_extents,
+            high=self.world_box_center_base + half_extents,
             dtype=np.float64
         )
 
@@ -159,10 +165,17 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         #init_joints_degrees = [-21.58, -97.97, -66.38, -106.18, 88.76, -21.74]
         # init_joints_grad = [angle * np.pi / 180 for angle in init_joints_degrees]
         self.init_qpos = np.round(np.deg2rad(init_joints_degrees), 4) #self.model.keyframe("home").qpos.copy() # joint positions of the robot at the beginning of the episode(first point of the trajectory)
-        self.init_qpos = np.round(np.array([-0.37626284, -1.71089287, -1.15919388, -1.85352342,  1.55074358,
-       -0.37225355]), 4)
-        # precomputed target trajectory and orientation of the TCP given in the base frame in mm
-        _ , trajectory_in_base_frame = elliptical_trajectory(a=5, b=3, N=self.num_points, show_plot=False)
+        #self.init_qpos = np.round(np.array([-0.37626284, -1.71089287, -1.15919388, -1.85352342,  1.55074358, -0.37225355]), 4)
+        
+        self.init_qpos = np.round(np.array([-3.84677925e-01, -1.71740353e+00, -1.15198836e+00, -1.85319141e+00, 1.55303165e+00, -3.94792109e-01]), 4) # 5, 3
+        # Strukturelle Offset startjoint: 
+        # [-0.39834047, -1.7368403,  -1.14903885, -1.84659214,  1.56464244, -0.41421658, -0.02363703, -0.03026103]
+        # -3.98074516e-01 -1.73658073e+00 -1.14930913e+00 -1.84654435e+00 1.56438704e+00 -4.13659315e-01
+        self.init_qpos = np.round(np.array([-0.38634197, -1.71695484, -1.15038477, -1.85402801,  1.55444177, -0.3969392 ]), 4)
+        #self.init_qpos = np.round(np.array([-0.4430626,  -1.73563705, -0.94673805, -1.95636366,  1.62697667, -0.4984419]), 4)
+        #self.init_qpos = np.round(np.array([-0.37590172, -1.71870273, -1.15287911, -1.84531756,  1.54913177, -0.4105368]), 4) # 7, 5
+        # precomputed target trajectory and orientation of the TCP given in the base frame in mm ,ellipse_center_global=elipse_center_global
+        _ , trajectory_in_base_frame = elliptical_trajectory(a=self.a, b=self.b, N=self.num_points, ellipse_center_global=self.ellipse_center_g, show_plot=False)
         self.target_path, self.target_tangent, self.target_binormal, self.target_normal = trajectory_in_base_frame
         #print(self.target_path)
         self.target_path = np.round(clean_null_noise(self.target_path, self.null_threshold), 2) # in mm
@@ -173,6 +186,7 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         self.max_wrist3_delta = np.ceil(np.rad2deg(np.arccos( self.target_tangent[:,0]@self.target_tangent[:,1])))
         print("wrist max dela: ", self.max_wrist3_delta)
         self._max_joint_delta[-1] = self.max_wrist3_delta
+        #self._max_joint_delta[-1] = 25 #1.0
         # will be set at reset time to a point near the first point of the trajectory( for the moment,
         # it will be set to the first trajectory point later, but it can be set to a random point near the first trajectory point)
         # self.current_pos = None # np.array([self.target_path[0,0], self.target_path[1,0], self.target_path[2,0]])
@@ -409,7 +423,7 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         ori_cost = 0.0
         # if self.ori_err_mat[0,0] < 0 or self.ori_err_mat[1,1] < 0 or self.ori_err_mat[2,2] < 0:
         #     ori_cost = 1.0 # penalty for negative diagonal elements in the orientation error matrix
-        if err > np.deg2rad(5):
+        if err > np.deg2rad(self.ori_cost):
             ori_cost += 50*np.round(err,4)# - self.threshold_ori,4)
         return ori_cost
     
@@ -466,6 +480,16 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         #if segment_sq > 1e-8:
         s = np.dot(to_robot, segment) / segment_sq
         return s
+    def get_scalar_projection_r(self, cur_pos):
+            """ give the scalar projection of the actual ee position on the current path segment"""
+            segment = self.current_segment
+            to_robot = cur_pos - self.prev_target_pos
+    
+            segment_sq = np.dot(segment, segment)
+            assert segment_sq > 1e-8 , "current segment length is null. not a valid value"
+            #if segment_sq > 1e-8:
+            s = np.dot(to_robot, segment) / segment_sq
+            return s
     
     def get_cross_error_vec(self):
         s = self.get_scalar_projection()
@@ -474,12 +498,23 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         deviation_error_vec = self.current_pos - p_proj
         return deviation_error_vec
     
+    def get_cross_error_vec_r(self, cur_pos):
+            s = self.get_scalar_projection_r(cur_pos)
+            s_clip = np.clip(s, 0.0, 1.0)
+            p_proj = self.prev_target_pos + s_clip * self.current_segment
+            deviation_error_vec = cur_pos - p_proj
+            return deviation_error_vec
+    
     def get_interpolated_ori_errmat(self):
         s = np.clip(self.get_scalar_projection(), 0.0, 1.0)
         R_des = self.interpolate_rotation(self.prev_target_ori, self.current_target_ori, s)
         R_err = R_des.T @ self.current_ori
         return R_err
-
+    def get_interpolated_ori_errmat_r(self, cur_pos, cur_ori):
+            s = np.clip(self.get_scalar_projection_r(cur_pos), 0.0, 1.0)
+            R_des = self.interpolate_rotation(self.prev_target_ori, self.current_target_ori, s)
+            R_err = R_des.T @ cur_ori
+            return R_des, R_err
     def compute_reward(self):
 
         #
@@ -528,7 +563,7 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         # pen_ori_deviation = 0.0
         if break_on_big_ori_error:
             pen_ori_deviation -= 1.0*gain # large penalty for too large orientation deviation
-        break_on_big_ori_error = break_on_big_ori_error or (np.rad2deg(np.arccos(on_path_dev))  > 2*self.threshold_ori) # only break if the orientation error is too large
+        break_on_big_ori_error = break_on_big_ori_error or (np.rad2deg(np.arccos(on_path_dev))  > 10) # only break if the orientation error is too large
         #progress = [self.s_prev, s]
         reward_ori = r_ori_progress + pen_ori_deviation
         #
@@ -538,8 +573,8 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         global_progress = self.current_target_idx + s_clip
 
         delta_global_progress = global_progress - self.prev_global_progress
-        delta_ori_step = (self.threshold_ori - np.arccos(on_path_dev)) #penalty for orientation deviation from the desired orientation along the path at the current step
-        reward_global = 0.4 * delta_global_progress * gain + delta_ori_step * 0.6 * gain #- self._get_orientation_cost(orientation_error_matrices(R_des, self.current_ori)) # reward for global progress along the trajectory and penalty for orientation deviation from the desired orientation along the path at the current step
+        delta_ori_step = (self.threshold_ori - np.arccos(on_path_dev)) #penalty/bonus for orientation deviation from the desired orientation along the path at the current step
+        reward_global = 0.4 * delta_global_progress * gain + delta_ori_step * 0.6 * gain - self._get_orientation_cost(orientation_error_matrices(R_des, self.current_ori)) # reward for global progress along the trajectory and penalty for orientation deviation from the desired orientation along the path at the current step
 
 
         self.s_max = max(self.s_max, s_clip)

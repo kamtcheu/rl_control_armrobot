@@ -1,5 +1,5 @@
 import numpy as np
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 # -------------------------------------------------------------------------
 # 1. Geometry and Configuration Constants
@@ -11,7 +11,7 @@ Rn = 12
 theta_h = +90 / 180 * np.pi
 
 # Note: Keeping your large numbers intact from the MATLAB script
-elipse_center_global = np.array([[-335.00], [-10], [+297.00]]) #np.array([[-289.997], [+6.666], [+247.185]])  # Convert mm to meters
+elipse_center_global =np.array([[-335.00], [-10], [+297.00]]) #np.array([[-289.997], [+6.666], [+247.185]])  # Convert mm to meters
 
 N = 15  # Number of points to generate, matching MATLAB's 180:10:360
 # theta = np.linspace(180, 360, N) * np.pi / 180  # Convert degrees to radians
@@ -101,6 +101,8 @@ O_t_base = np.zeros((3, N))
 # -------------------------------------------------------------------------
 # 4. Main Computation Loop
 # -------------------------------------------------------------------------
+print("ellipse_center_global: ",np.append(elipse_center_global, 1.0).reshape(4, 1))
+
 for i in range(N):
     # Radius computation
     P_r_val = np.sqrt(b**2 / (1 - k * (np.cos(phi[i]))**2))
@@ -125,7 +127,8 @@ for i in range(N):
     # O_t_homogen = np.append(O_t[:, i], 1.0).reshape(4, 1)
     # O_tcp_homogen = T_t2tcp @ O_t_homogen
     # O_tcp[:, i] = O_tcp_homogen[0:3].flatten()
-    O_tcp[:, i] = (R_x_m90 @ R_t2tcp @ O_t[:, i : i + 1]).flatten()
+    # O_tcp[:, i] = (R_x_m90 @ R_t2tcp @ O_t[:, i : i + 1]).flatten()
+    O_tcp[:, i] = (R_t2tcp @R_x_m90 @ O_t[:, i : i + 1]).flatten()
     O_t2tcp[:, i] = (R_t2tcp @ O_t[:, i : i + 1]).flatten()
 
     # Homogeneous transformations to Robot Base space
@@ -157,54 +160,54 @@ print("ellipse_center_base: ", T_global2base @ np.append(elipse_center_global, 1
 # # -------------------------------------------------------------------------
 # # 5. Plotting Generation (3 Subplots matching MATLAB figure 1)
 # # -------------------------------------------------------------------------
-# fig = plt.figure(figsize=(18, 6))
+fig = plt.figure(figsize=(18, 6))
 
-# # Subplot 1: Target Needle Tip
-# ax1 = fig.add_subplot(1, 3, 1, projection='3d')
-# ax1.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
-# ax1.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-# ax1.set_title('Target Needle Tip\n(global pos + global orient)')
-# ax1.set_xlabel('x_t')
-# ax1.set_ylabel('y_t')
-# ax1.set_zlabel('z_t')
-# #ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
-# ax1.grid(True)
+# Subplot 1: Target Needle Tip
+ax1 = fig.add_subplot(1, 3, 1, projection='3d')
+ax1.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
+ax1.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
+ax1.set_title('Target Needle Tip\n(global pos + global orient)')
+ax1.set_xlabel('x_t')
+ax1.set_ylabel('y_t')
+ax1.set_zlabel('z_t')
+#ax1.view_init(elev=90, azim=0) # Emulates view(90,0)
+ax1.grid(True)
 
-# # Subplot 2: Target TCP
-# ax2 = fig.add_subplot(1, 3, 2, projection='3d')
-# ax2.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
-# ax2.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-# ax2.plot3D(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], 'y', linewidth=2)
-# ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
-# ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='g', length=0.2)
-# ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], N[0, :], N[1, :], N[2, :], color='b', length=0.2)
-# ax2.set_title('Target tcp\n(global position)')
-# ax2.set_xlabel('x_tcp')
-# ax2.set_ylabel('y_tcp')
-# ax2.set_zlabel('z_tcp')
-# ax2.grid(True)
+# Subplot 2: Target TCP
+ax2 = fig.add_subplot(1, 3, 2, projection='3d')
+ax2.plot3D(P_t[0, :], P_t[1, :], P_t[2, :], 'b', linewidth=2)
+ax2.quiver(P_t[0, :], P_t[1, :], P_t[2, :], O_t[0, :], O_t[1, :], O_t[2, :], color='r', length=0.2)
+ax2.plot3D(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], 'y', linewidth=2)
+ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], T[0, :],T[1, :], T[2, :], color='r', length=0.2)
+ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='g', length=0.2)
+ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], N[0, :], N[1, :], N[2, :], color='b', length=0.2)
+ax2.set_title('Target tcp\n(global position)')
+ax2.set_xlabel('x_tcp')
+ax2.set_ylabel('y_tcp')
+ax2.set_zlabel('z_tcp')
+ax2.grid(True)
 
-# # Subplot 3: Required Base Position
-# ax3 = fig.add_subplot(1, 3, 3, projection='3d')
-# ax3.plot3D(P_base[0, :], P_base[1, :], P_base[2, :], 'b', linewidth=2)
-# ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_base[0, :], O_base[1, :], O_base[2, :], color='r', length=0.2)
-# ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_t_base[0, :], O_t_base[1, :], O_t_base[2, :], color='g', length=0.2)
-# ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], N_base[0, :], N_base[1, :], N_base[2, :], color='y', length=0.2)
-# ax3.set_title('Required Base\nposition and orientation')
-# ax3.set_xlabel('x_base')
-# ax3.set_ylabel('y_base')
-# ax3.set_zlabel('z_base')
-# ax3.grid(True)
+# Subplot 3: Required Base Position
+ax3 = fig.add_subplot(1, 3, 3, projection='3d')
+ax3.plot3D(P_base[0, :], P_base[1, :], P_base[2, :], 'b', linewidth=2)
+ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_base[0, :], O_base[1, :], O_base[2, :], color='r', length=0.2)
+ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], O_t_base[0, :], O_t_base[1, :], O_t_base[2, :], color='g', length=0.2)
+ax3.quiver(P_base[0, :], P_base[1, :], P_base[2, :], N_base[0, :], N_base[1, :], N_base[2, :], color='y', length=0.2)
+ax3.set_title('Required Base\nposition and orientation')
+ax3.set_xlabel('x_base')
+ax3.set_ylabel('y_base')
+ax3.set_zlabel('z_base')
+ax3.grid(True)
 
-# plt.tight_layout()
-# plt.ion()
-# plt.show(block=False)
+plt.tight_layout()
+plt.ion()
+plt.show(block=True)
 #%%
 
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, ellipse_center_global=np.array([[-289.997], [+6.666], [+247.185]]), N=19, show_plot=False):
+def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, ellipse_center_global=np.array([[-335.00], [-10], [+297.00]]) , N=19, show_plot=False):
     """
     Generates an elliptic trajectory for a robotic arm based on predefined parameters.
     
@@ -292,13 +295,15 @@ def elliptical_trajectory(a=5, b=3, Rn=12, theta_h=90/180*np.pi, ellipse_center_
     # -------------------------------------------------------------------------
     # 4. Main Computation Loop
     # -------------------------------------------------------------------------
+    print("ellipse_center_global: ",np.append(ellipse_center_global, 1.0).reshape(4, 1))
+
     for i in range(N):
         # Radius computation
         P_r_val = np.sqrt(b**2 / (1 - k * (np.cos(phi[i]))**2))
         
         # Target position
         P_t_col = np.array([[0.0], [P_r_val * np.cos(phi[i])], [P_r_val * np.sin(phi[i])]])
-        P_t[:, i : i + 1] = P_t_col + elipse_center_global + np.array([[0], [0], [delta_z]])
+        P_t[:, i : i + 1] = P_t_col + ellipse_center_global + np.array([[0], [0], [delta_z]])
 
         # Tangent vector derivative logic
         P_r_dot_val = (-0.5 * b * np.sin(2 * phi[i]) * k) / (1 - k * (np.cos(phi[i]))**2)**1.5

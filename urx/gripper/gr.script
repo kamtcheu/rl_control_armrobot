@@ -1,0 +1,3041 @@
+def move_gripper():
+
+  set_tcp(p[0.0,0.0,0.0,0.0,0.0,0.0])
+  set_payload(0.78)
+  set_standard_analog_input_domain(0, 1)
+  set_standard_analog_input_domain(1, 1)
+  set_tool_analog_input_domain(0, 1)
+  set_tool_analog_input_domain(1, 1)
+  set_analog_outputdomain(0, 0)
+  set_analog_outputdomain(1, 0)
+  set_input_actions_to_default()
+  set_gravity([0.0, 0.0, 9.82])
+  set_tool_voltage(24)
+  step_count_23f07365_b7bb_492a_ba92_98c429a5d15c = 0.0
+  thread Step_Counter_Thread_4a7bcec8_6b18_4cfc_b6c3_c30b62a57632():
+    while (True):
+      step_count_23f07365_b7bb_492a_ba92_98c429a5d15c = step_count_23f07365_b7bb_492a_ba92_98c429a5d15c + 1.0
+      sync()
+    end
+  end
+  run Step_Counter_Thread_4a7bcec8_6b18_4cfc_b6c3_c30b62a57632()
+  set_safety_mode_transition_hardness(1)
+  global Referenzpunkt=p[0.0,0.0,0.0,0.0,0.0,0.0]
+  # begin: URCap Installation Node
+  #   Source: OnRobot, 5.1.4, OnRobot A/S
+  #   Type: OnRobot Einstellung
+  on_robot_type = 3
+  on_robot_cycle = 8.0
+  on_device_ip = "141.64.75.58"
+  on_device_socket_port = 51234
+  on_xmlrpc = rpc_factory("xmlrpc", "http://141.64.75.58:41414")
+  on_RPC = rpc_factory("xmlrpc", "http://127.0.0.1:31416")
+  ON_DEBUG_LOG = False
+  on_isMetric = True
+  on_toolConnector = False
+  on_ioqc = False
+  on_dual = False
+  on_ft = True
+  on_hex = True
+  on_gecko = 0
+  cb_robot_cycle = 8
+  on_gripper = [False, False, False]
+  rg_index = 0
+  on_gripper[rg_index] = True
+  #======    OnRobot Globals    ======#
+
+  ON_MATH_PI=3.141593
+  ON_ZEROPOSE=p[0.0,0.0,0.0,0.0,0.0,0.0]
+  ON_ZEROFRAME=p[0.0,0.0,0.0,0.0,0.0,0.0]
+  ON_ZERO3D=[0.0,0.0,0.0]
+  ON_ZERO6D=[0.0,0.0,0.0,0.0,0.0,0.0]
+  ON_ZERO8D=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+  ON_FALSE3D=[False,False,False]
+  ON_FALSE6D=[False,False,False,False,False,False]
+  ON_FALSE8D=[False,False,False,False,False,False,False,False]
+  global on_return=0
+  on_speedL=ON_ZERO6D
+  on_speedBase=ON_ZERO6D
+  on_speedVect=ON_ZERO6D
+  on_speedExtra=ON_ZERO6D
+  on_speedDC=ON_ZERO6D
+  on_speedGecko=ON_ZERO6D
+  on_floatRegShift=24
+  on_intRegShift=24
+  on_boolRegShift=64
+  ON_BASE_SHIFT_FLOAT=24
+  ON_BASE_SHIFT_INT=24
+  ON_BASE_SHIFT_BOOL=64
+  ON_DEVICE_SHIFT_FLOAT=3
+  ON_DEVICE_SHIFT_INT=2
+  ON_DEVICE_SHIFT_BOOL=7
+  ON_COMMON_SHIFT_FLOAT=12
+  ON_COMMON_SHIFT_INT=3
+  ON_COMMON_SHIFT_BOOL=1
+  ON_DI_SINGLE=0
+  ON_DI_PRIMARY=1
+  ON_DI_SECONDARY=2
+  ON_DI_DUAL=3
+  ON_DEVICE_ID_MISSING=0
+  ON_INIT_TIMEOUT=500
+  on_robot_TCP_offset=ON_ZEROFRAME
+  on_tcp_offset_actual=ON_ZEROFRAME
+  on_cog_actual=ON_ZEROFRAME
+  on_mass_actual=0.0
+  on_robot_mount=[0.0,0.0]
+
+  #======    End of OnRobot Globals    ======#
+  #======    OnRobot FT Globals    ======#
+
+  global F3D=0
+  global T3D=0
+  global FT_Base=[0,0,0,0,0,0]
+  global FT_Tool=[0,0,0,0,0,0]
+  def get_F3D():
+  return F3D
+  end
+  def get_T3D():
+  return T3D
+  end
+  def get_FT_Base():
+  return FT_Base
+  end
+  def get_FT_Tool():
+  return FT_Tool
+  end
+  ft_parent_ft_move_frameID=0
+  ft_parent_ft_move_frame=ON_ZEROFRAME
+
+  #======    End of OnRobot FT Globals    ======#
+  #======    OnRobot HEX Globals    ======#
+
+  global Fx=0
+  global Fy=0
+  global Fz=0
+  global Tx=0
+  global Ty=0
+  global Tz=0
+  def get_Fx():
+  return Fx
+  end
+  def get_Fy():
+  return Fy
+  end
+  def get_Fz():
+  return Fz
+  end
+  def get_Tx():
+  return Tx
+  end
+  def get_Ty():
+  return Ty
+  end
+  def get_Tz():
+  return Tz
+  end
+  ft_compute_engine_ping=0
+  ft_compute_engine_ping_max=0
+  ft_Engine_state=0
+  ft_Sensor_ID=0
+  ft_has_valid_ID=False
+  FT_hex=ON_ZERO6D
+  ft_Status_hex=0
+  ft_Biased=False
+  hex_qc_offset=p[0,0,0,0,0,0]
+
+  #======    End of OnRobot HEX Globals    ======#
+  #======    OnRobot RG Globals    ======#
+
+  RG_DEVICE_ID_RG2=32
+  RG_DEVICE_ID_RG6=33
+  if ON_DEBUG_LOG:
+  textmsg("RG Dual: False, Index: ",rg_index)
+  if False:
+  rg_index=-1
+  end
+  end
+  rg_Width_arr=[0,0,0]
+  rg_Depth_arr=[0,0,0]
+  rg_DepthRel_arr=[0,0,0]
+  rg_Device_ID_arr=[0,0,0]
+  rg_Status_arr=[0,0,0]
+  rg_Grip_detected_arr=[False,False,False]
+  rg_Busy_arr=[False,False,False]
+  rg_S1_pushed_arr=[False,False,False]
+  rg_S1_triggered_arr=[False,False,False]
+  rg_S2_pushed_arr=[False,False,False]
+  rg_S2_triggered_arr=[False,False,False]
+  rg_Safety_error_arr=[False,False,False]
+  rg_Speed_arr=[0,0,0]
+  rg_Angle_arr=[0,0,0]
+  rg_Angle_speed_arr=[0,0,0]
+  rg_Depth_prev_arr=[0,0,0]
+  rg_speedDC=ON_ZERO6D
+  rg_data_error_arr=[0,0,0]
+  rg_mounting_angle_arr=[0,0,0]
+  rg_fingertip_arr=[0,0,0]
+  rg_Grip_guard_arr=[False,False,False]
+
+  global rg_Width=0
+  global rg_Depth=0
+  global rg_DepthRel=0
+  global rg_Busy=False
+  global rg_Grip_detected=False
+  def get_rg_Width():
+  return rg_Width
+  end
+  def get_rg_Depth():
+  return rg_Depth
+  end
+  def get_rg_DepthRel():
+  return rg_DepthRel
+  end
+  def get_rg_Busy():
+  return rg_Busy
+  end
+  def get_rg_Grip_detected():
+  return rg_Grip_detected
+  end
+
+  rg2_mount_bracket_offset=35.0/1000.0
+  rg2_mount_body_offset=p[0.0,0.0,0.180,0.0,0.0,0.0]
+  rg2_mount_cog_offset=p[0.0,0.0,0.065,0.0,0.0,0.0]
+  rg6_mount_bracket_offset=35.0/1000.0
+  rg6_mount_body_offset=p[0.0,0.0,0.230,0.0,0.0,0.0]
+  rg6_mount_cog_offset=p[0.0,0.0,0.080,0.0,0.0,0.0]
+
+  #======    End of OnRobot RG Globals    ======#
+  #======    OnRobot Interface Messages    ======#
+
+  on_devices_primary_log="OnRobot Geräte"
+  on_devices_secondary_log="Sekundäres OnRobot Gerät"
+  on_device_error_title="OnRobot – Gerätefehler"
+  on_install_error="Die OnRobot Einstellung ist nicht korrekt.<br>Überprüfen Sie den Status auf der OnRobot-Einrichtungsseite unter der Registerkarte „Installation“.<br>Programm angehalten."
+  on_device_missing="Kein Gerät angeschlossen.<br>Programm angehalten."
+  ft_device_missing="Kein OnRobot F/T-Sensor angeschlossen.<br>Programm angehalten."
+  rg2ft_device_missing="Kein RG2-FT-Greifer angeschlossen.<br>Programm angehalten."
+  rg_device_missing="Kein RG-Greifer angeschlossen.<br>Programm angehalten."
+  vg_device_missing="Kein VG-Greifer angeschlossen.<br>Programm angehalten."
+  gg_device_missing="Kein Gecko Gripper angeschlossen.<br>Programm angehalten."
+  sg_device_missing="Kein Soft Gripper angeschlossen.<br>Programm angehalten."
+  tfg_device_missing="Kein 3FG-Greifer angeschlossen.<br>Programm angehalten."
+  on_xmlrpc_start_ip="Verbindung zum OnRobot XML-RPC Server herstellen:"
+  on_java_comm_error_textmsg_title="OnRobot - Kommunikationsfehler:"
+  on_java_comm_controlsocket_open_error="Öffnen von 'javaSocket' war nicht erfolgreich."
+  on_java_comm_error_title="OnRobot - Kommunikationsfehler"
+  on_java_comm_socket_open_error="Zeitüberschreitung beim Verbindungsaufbau mit dem URCap.<br>Überprüfen Sie den Status auf der OnRobot-Einrichtungsseite auf der Registerkarte „Installation“."
+  on_rtde_feed_error_textmsg_title="OnRobot - Kommunikationsfehler:"
+  on_rtde_feed_open_error_textmsg="Öffnen von Socket 'rtdeFeed' war nicht erfolgreich."
+  on_rtde_feed_error_title="OnRobot - Kommunikationsfehler"
+  on_rtde_feed_open_error="Zeitüberschreitung beim Verbindungsaufbau mit den Geräten.<br>Stellen Sie sicher, dass die OnRobot-Geräte betriebsbereit sind, und überprüfen Sie den Status auf der OnRobot-Einstellungsseite in der Registerkarte „Installation“."
+
+  #======    End of OnRobot Interface Messages    ======#
+  #======    OnRobot Interface    ======#
+
+  on_portopened_javaSocket=False
+  on_rtde_feed_opened=False
+  on_dataRead_running=False
+  FT_SENSOR_ID_UNDEFINED=0
+  FT_SENSOR_ID_UNKNOWN=1
+  FT_SENSOR_ID_HEX_V1=11
+  FT_SENSOR_ID_HEX_V2=12
+  FT_SENSOR_ID_HEX_V3=13
+  FT_SENSOR_ID_RG2FT_V0=20
+  FT_SENSOR_ID_RG2FT_V1=21
+  FT_SENSOR_ID_RG2FT_V2=22
+  def on_error(status_flag,message,title,stop_var=False):
+  if(status_flag):
+  popup(message,title=title,error=True,blocking=False)
+  stop_var=True
+  end
+  return stop_var
+  end
+  def on_warning(status_flag,message,title):
+  if(status_flag):
+  textmsg(title,message)
+  end
+  end
+  def on_missing():
+  popup(on_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def ft_missing():
+  popup(ft_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def rg2ft_missing():
+  popup(rg2ft_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def rg_missing():
+  popup(rg_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def vg_missing():
+  popup(vg_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def gg_missing():
+  popup(gg_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def sg_missing():
+  popup(sg_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def tfg_missing():
+  popup(tfg_device_missing,title=on_device_error_title,error=True,blocking=False)
+  halt
+  end
+  def on_portclose_javaSocket():
+  socket_close("javaSocket")
+  on_portopened_javaSocket=False
+  end
+  def on_portopen_javaSocket():
+  on_portclose_javaSocket()
+  on_portopened_javaSocket=socket_open("127.0.0.1",44005,"javaSocket")
+  if not on_portopened_javaSocket:
+  textmsg(on_java_comm_error_textmsg_title,on_java_comm_controlsocket_open_error)
+  popup(on_java_comm_socket_open_error,title=on_java_comm_error_title,error=True,blocking=False)
+  halt
+  end
+  end
+  def on_rtde_feed_close():
+  socket_close("rtdeFeed")
+  on_rtde_feed_opened=False
+  end
+  def on_rtde_feed_open():
+  on_rtde_feed_close()
+  on_rtde_feed_opened=socket_open(on_device_ip,on_device_socket_port,"rtdeFeed")
+  if not on_rtde_feed_opened:
+  on_rtde_feed_opened=socket_open(on_device_ip,on_device_socket_port,"rtdeFeed")
+  end
+  if not on_rtde_feed_opened:
+  textmsg(on_rtde_feed_error_textmsg_title,on_rtde_feed_open_error_textmsg)
+  popup(on_rtde_feed_open_error,title=on_rtde_feed_error_title,error=True,blocking=False)
+  halt
+  end
+  end
+  def on_dataRead():
+  enter_critical
+  floatRegDummy=read_input_float_register(0+on_floatRegShift)
+  on_speedVect[0]=floatRegDummy/1000.0
+  floatRegDummy=read_input_float_register(1+on_floatRegShift)
+  on_speedVect[1]=floatRegDummy/1000.0
+  floatRegDummy=read_input_float_register(2+on_floatRegShift)
+  on_speedVect[2]=floatRegDummy/1000.0
+  floatRegDummy=read_input_float_register(3+on_floatRegShift)
+  on_speedVect[3]=floatRegDummy
+  floatRegDummy=read_input_float_register(4+on_floatRegShift)
+  on_speedVect[4]=floatRegDummy
+  floatRegDummy=read_input_float_register(5+on_floatRegShift)
+  on_speedVect[5]=floatRegDummy
+  exit_critical
+  end
+  def on_set_rtde_watchdog(updateHz=5,ftWD=False,gripperWD=-1):
+  local update_str=str_cat(" watchdog set to [Hz]: ",updateHz)
+  if ftWD:
+  watchdog_int_reg_str=str_cat("input_int_register_",0+on_intRegShift)
+  rtde_set_watchdog(watchdog_int_reg_str,updateHz,"stop")
+  if ON_DEBUG_LOG:
+  textmsg(watchdog_int_reg_str,update_str)
+  end
+  end
+  if not(gripperWD<0):
+  if(gripperWD==ON_DI_SINGLE or gripperWD==ON_DI_PRIMARY or gripperWD==ON_DI_DUAL):
+  watchdog_int_reg_str=str_cat("input_int_register_",3+on_intRegShift)
+  rtde_set_watchdog(watchdog_int_reg_str,updateHz,"stop")
+  if ON_DEBUG_LOG:
+  textmsg(watchdog_int_reg_str,update_str)
+  end
+  end
+  if(gripperWD==ON_DI_SECONDARY or gripperWD==ON_DI_DUAL):
+  watchdog_int_reg_str=str_cat("input_int_register_",ON_DEVICE_SHIFT_INT+3+on_intRegShift)
+  rtde_set_watchdog(watchdog_int_reg_str,updateHz,"stop")
+  if ON_DEBUG_LOG:
+  textmsg(watchdog_int_reg_str,update_str)
+  end
+  end
+  end
+  end
+  def on_speedVect_get():
+  return[on_speedVect[0],on_speedVect[1],on_speedVect[2],on_speedVect[3],on_speedVect[4],on_speedVect[5]]
+  end
+  def on_speedDC_get():
+  local speedExtra=ON_ZERO6D
+  if on_speedl_for_depthcompensation:
+  speedExtra=[on_speedDC[0],on_speedDC[1],on_speedDC[2],on_speedDC[3],on_speedDC[4],on_speedDC[5]]
+  end
+  return speedExtra
+  end
+  def on_speedDC_set(speedDC):
+  on_speedDC=[speedDC[0],speedDC[1],speedDC[2],speedDC[3],speedDC[4],speedDC[5]]
+  end
+  def on_speedGecko_get():
+  local speedExtra=ON_ZERO6D
+  if on_speedl_for_gecko:
+  speedExtra=[on_speedGecko[0],on_speedGecko[1],on_speedGecko[2],on_speedGecko[3],on_speedGecko[4],on_speedGecko[5]]
+  end
+  return speedExtra
+  end
+  def on_speedGecko_set(speedGecko):
+  on_speedGecko=[speedGecko[0],speedGecko[1],speedGecko[2],speedGecko[3],speedGecko[4],speedGecko[5]]
+  end
+  thread on_dataRead_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Starting on_dataRead thread")
+  end
+  while on_dataRead_running:
+  sync()
+  on_dataRead()
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Stopping on_dataRead thread")
+  end
+  end
+
+  #======    End of OnRobot Interface    ======#
+
+  #======    End of OnRobot CB Interface Messages    ======#
+
+  #======    End of OnRobot CB Interface    ======#
+  #======    OnRobot FT Interface Messages    ======#
+
+  ft_ce_comm_cmd_send_error="Das Senden des Befehls an die Compute Box ist fehlgeschlagen. Erneutes Senden. Befehl:"
+  ft_ce_comm_cmd_send_again="Versuchen Sie, den Befehl erneut zu senden..."
+  ft_ce_comm_int_send_error="Das Senden von Ganzzahlen an die Compute Box ist fehlgeschlagen. Erneutes Senden. Ganzzahl:"
+  ft_ce_comm_int_send_again="Versuchen Sie, die Ganzzahl erneut zu senden..."
+  ft_ce_comm_float_send_error="Das Senden von Gleitkommazahlen an die Compute Box ist fehlgeschlagen. Erneutes Senden. Gleitkommazahl:"
+  ft_ce_comm_float_send_again="Versuchen Sie, Gleitkommazahlen als Ganzzahlen erneut zu senden..."
+  ft_ce_comm_dummy_send_error="Das Senden von Dummys an die Compute Box ist fehlgeschlagen. Erneutes Senden. [Counter, out of]:"
+  ft_ce_comm_dummy_send_again="Versuchen Sie, noch einmal einen Dummy zu senden ..."
+  ft_cmd_error_title="OnRobot-Befehlsfehler"
+  ft_cmd_rx_invalid_id="Ungültige Befehls-ID"
+  ft_cmd_rx_wrong_state="Falscher Befehlszustand."
+  ft_cmd_rx_error_length="Unbekannte Befehlslänge empfangen:"
+  of_float_to_int_overflow="Überschreitung: Gleitkommazahl zu Ganzzahl!"
+  of_float_to_int_underflow="Unterschreitung: Gleitkommazahl zu Ganzzahl!"
+
+  #======    End of OnRobot FT Interface Messages    ======#
+  #======    OnRobot FT Interface    ======#
+
+  FT_DEBUG_CMD=False
+  FT_DEBUG_TX=False
+  FT_DEBUG_RX=False
+  FT_DEBUG_VAR=False
+  ft_compute_engine_ping=0
+  ft_compute_engine_ping_max=0
+  ft_dataRead_running=False
+  ft_dataProcess_running=False
+  ft_cmd_received=0
+  ft_cmd_state=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  ft_cmd_return=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  ft_cmd_rx=[0,0,0]
+  of_ack_received=False
+  CB_COMPUTE_ENGINE_PING_LIMIT=19
+  CB_COMPUTE_ENGINE_PING_DESC=0.05
+  CB_SCALE_FLOAT=1000000
+  FT_CMD_STATE_IDLE=0
+  FT_CMD_STATE_STARTED=1
+  FT_CMD_STATE_RETURNING=2
+  FT_CMD_STATE_INTERRUPTED=3
+  FT_CMD_ACK=0
+  FT_CMD_PAYLOAD=6
+  FT_CMD_INSERT_PART=15
+  FT_CMD_TX_PARAM_LENGTH=20
+  FT_DUMMY_VALUE=-1
+  def of_float_to_int(value):
+  if value>(2147483647/CB_SCALE_FLOAT):
+  textmsg(of_float_to_int_overflow,value)
+  value=2147483647/CB_SCALE_FLOAT
+  elif value<(-2147483648/CB_SCALE_FLOAT):
+  textmsg(of_float_to_int_underflow,value)
+  value=-2147483648/CB_SCALE_FLOAT
+  end
+  return value*CB_SCALE_FLOAT
+  end
+  def of_int_to_float(value):
+  return value/CB_SCALE_FLOAT
+  end
+  thread ft_commandFlow_RX_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Starting Command RX thread..")
+  end
+  while on_rtde_feed_opened:
+  ft_cmd_rx=socket_read_binary_integer(2,"rtdeFeed",0)
+  if ft_cmd_rx[0]!=0:
+  parse_command()
+  end
+  sync()
+  ft_cmd_received=ft_cmd_received+1
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Stopping Command RX thread")
+  end
+  end
+  def of_send_command(command):
+  sync()
+  if FT_DEBUG_CMD or FT_DEBUG_TX:
+  textmsg("Sending command: ",command)
+  end
+  local succ=socket_send_int(command,"rtdeFeed")
+  if not succ:
+  if ON_DEBUG_LOG and FT_DEBUG_TX:
+  textmsg(ft_ce_comm_cmd_send_error,command)
+  popup(ft_ce_comm_cmd_send_again,title=on_rtde_feed_error_title,warning=True,blocking=False)
+  end
+  sync()
+  of_send_command(command)
+  end
+  end
+  def of_send_int(intvalue):
+  if FT_DEBUG_TX:
+  textmsg("Sending integer: ",intvalue)
+  end
+  local succ=socket_send_int(intvalue,"rtdeFeed")
+  if not succ:
+  if ON_DEBUG_LOG and FT_DEBUG_TX:
+  textmsg(ft_ce_comm_int_send_error,intvalue)
+  popup(ft_ce_comm_int_send_again,title=on_rtde_feed_error_title,warning=True,blocking=False)
+  end
+  sync()
+  of_send_int(intvalue)
+  end
+  end
+  def of_send_float_as_int(floatvalue):
+  local value=of_float_to_int(floatvalue)
+  if FT_DEBUG_TX:
+  textmsg("Sending [float, as int]: ",[floatvalue,value])
+  end
+  local succ=socket_send_int(value,"rtdeFeed")
+  if not succ:
+  if ON_DEBUG_LOG and FT_DEBUG_TX:
+  textmsg(ft_ce_comm_float_send_error,floatvalue)
+  popup(ft_ce_comm_float_send_again,title=on_rtde_feed_error_title,warning=True,blocking=False)
+  end
+  sync()
+  of_send_float_as_int(floatvalue)
+  end
+  end
+  def of_send_dummies(count):
+  if FT_DEBUG_TX:
+  textmsg("Sending dummies: ",count)
+  end
+  local counter=0
+  while counter<count:
+  local succ=socket_send_int(FT_DUMMY_VALUE,"rtdeFeed")
+  if not succ:
+  if ON_DEBUG_LOG and FT_DEBUG_TX:
+  textmsg(ft_ce_comm_dummy_send_error,[(counter+1),count])
+  popup(ft_ce_comm_dummy_send_again,title=on_rtde_feed_error_title,warning=True,blocking=False)
+  end
+  counter=counter-1
+  sync()
+  end
+  counter=counter+1
+  end
+  end
+  def of_send_full(command,arg01=FT_DUMMY_VALUE,arg02=FT_DUMMY_VALUE,arg03=FT_DUMMY_VALUE,arg04=FT_DUMMY_VALUE,arg05=FT_DUMMY_VALUE,arg06=FT_DUMMY_VALUE,arg07=FT_DUMMY_VALUE,arg08=FT_DUMMY_VALUE,arg09=FT_DUMMY_VALUE,arg10=FT_DUMMY_VALUE,arg11=FT_DUMMY_VALUE,arg12=FT_DUMMY_VALUE,arg13=FT_DUMMY_VALUE,arg14=FT_DUMMY_VALUE,arg15=FT_DUMMY_VALUE,arg16=FT_DUMMY_VALUE,arg17=FT_DUMMY_VALUE,arg18=FT_DUMMY_VALUE,arg19=FT_DUMMY_VALUE,arg20=FT_DUMMY_VALUE):
+  if FT_DEBUG_TX:
+  textmsg("Sending full command: ",command)
+  end
+  of_send_command(command)
+  of_send_int(arg01)
+  of_send_int(arg02)
+  of_send_int(arg03)
+  of_send_int(arg04)
+  of_send_int(arg05)
+  of_send_int(arg06)
+  of_send_int(arg07)
+  of_send_int(arg08)
+  of_send_int(arg09)
+  of_send_int(arg10)
+  of_send_int(arg11)
+  of_send_int(arg12)
+  of_send_int(arg13)
+  of_send_int(arg14)
+  of_send_int(arg15)
+  of_send_int(arg16)
+  of_send_int(arg17)
+  of_send_int(arg18)
+  of_send_int(arg19)
+  of_send_int(arg20)
+  of_wait_for_ACK()
+  if FT_DEBUG_TX:
+  textmsg("Full command sent.")
+  end
+  end
+  def of_wait_for_ACK(timeout=0):
+  local timeout_sync_max=timeout*125
+  local timeout_sync=0
+  local timedOut=False
+  if timeout>=0:
+  useTimeout=True
+  else:
+  useTimeout=False
+  end
+  syncCounter=0
+  enter_critical
+  local ackReceived=of_ack_received
+  exit_critical
+  while((not ackReceived)and(not timedOut)):
+  sync()
+  if useTimeout:
+  timeout_sync=timeout_sync+1
+  if timeout_sync>timeout_sync_max:
+  timedOut=True
+  end
+  end
+  enter_critical
+  ackReceived=of_ack_received
+  exit_critical
+  end
+  enter_critical
+  of_ack_received=False
+  exit_critical
+  end
+  def of_wait_for_return(ft_cmd_id,blocking):
+  if not(ft_cmd_state[ft_cmd_id]==FT_CMD_STATE_IDLE):
+  textmsg("Command state: [cmd_id, state]",[ft_cmd_id,ft_cmd_state[ft_cmd_id]])
+  popup(ft_cmd_rx_wrong_state,title=ft_cmd_error_title,error=True,blocking=False)
+  halt
+  else:
+  enter_critical
+  ft_cmd_return[ft_cmd_id]=-1
+  ft_cmd_state[ft_cmd_id]=FT_CMD_STATE_STARTED
+  exit_critical
+  end
+  if blocking:
+  if FT_DEBUG_RX:
+  textmsg("Waiting for return of CMD: ",ft_cmd_id)
+  end
+  while ft_cmd_state[ft_cmd_id]==FT_CMD_STATE_STARTED:
+  sync()
+  end
+  end
+  enter_critical
+  local retVal=ft_cmd_return[ft_cmd_id]
+  ft_cmd_state[ft_cmd_id]=FT_CMD_STATE_IDLE
+  ft_cmd_return[ft_cmd_id]=0
+  exit_critical
+  if FT_DEBUG_RX:
+  textmsg("Return value received: [CMD, return]",[ft_cmd_id,retVal])
+  end
+  return retVal
+  end
+  def of_wait_for_return_stop(ft_cmd_id):
+  enter_critical
+  ft_cmd_state[ft_cmd_id]=FT_CMD_STATE_IDLE
+  exit_critical
+  end
+  def parse_command():
+  if ft_cmd_rx[0]==0:
+  if FT_DEBUG_RX:
+  textmsg("Nothing received..")
+  end
+  elif ft_cmd_rx[0]==1:
+  if FT_DEBUG_RX:
+  textmsg("Half command received: ",ft_cmd_rx[1])
+  end
+  elif ft_cmd_rx[0]==2:
+  if ft_cmd_rx[1]==FT_CMD_ACK:
+  enter_critical
+  of_ack_received=True
+  exit_critical
+  if FT_DEBUG_RX:
+  textmsg("Acknowledge received")
+  end
+  elif ft_cmd_rx[1]<get_list_length(ft_cmd_state):
+  enter_critical
+  local cmd_id=ft_cmd_rx[1]
+  if(ft_cmd_state[cmd_id]==FT_CMD_STATE_IDLE):
+  ft_cmd_return[cmd_id]=ft_cmd_rx[2]
+  elif(ft_cmd_state[cmd_id]==FT_CMD_STATE_STARTED):
+  ft_cmd_return[cmd_id]=ft_cmd_rx[2]
+  ft_cmd_state[cmd_id]=FT_CMD_STATE_RETURNING
+  else:
+  popup(ft_cmd_rx_wrong_state,title=ft_cmd_error_title,error=True,blocking=False)
+  halt
+  end
+  exit_critical
+  else:
+  popup(ft_cmd_rx_invalid_id,title=ft_cmd_error_title,error=True,blocking=False)
+  halt
+  end
+  else:
+  textmsg("Unknown command-length received: ",ft_cmd_rx)
+  end
+  end
+
+  #======    End of OnRobot FT Interface    ======#
+  #======    OnRobot HEX Interface    ======#
+
+  def ft_dataRead_hex():
+  enter_critical
+  floatRegDummy=read_input_float_register(6+on_floatRegShift)
+  FT_hex[0]=floatRegDummy
+  floatRegDummy=read_input_float_register(7+on_floatRegShift)
+  FT_hex[1]=floatRegDummy
+  floatRegDummy=read_input_float_register(8+on_floatRegShift)
+  FT_hex[2]=floatRegDummy
+  floatRegDummy=read_input_float_register(9+on_floatRegShift)
+  FT_hex[3]=floatRegDummy
+  floatRegDummy=read_input_float_register(10+on_floatRegShift)
+  FT_hex[4]=floatRegDummy
+  floatRegDummy=read_input_float_register(11+on_floatRegShift)
+  FT_hex[5]=floatRegDummy
+  intRegDummy=read_input_integer_register(0+on_intRegShift)
+  ft_Engine_state=intRegDummy
+  intRegDummy=read_input_integer_register(1+on_intRegShift)
+  ft_Sensor_ID=intRegDummy
+  intRegDummy=read_input_integer_register(2+on_intRegShift)
+  ft_Status_hex=intRegDummy
+  boolRegDummy=read_input_boolean_register(0+on_boolRegShift)
+  ft_Biased=boolRegDummy
+  exit_critical
+  end
+  thread hex_dataRead_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Starting hex_dataRead thread")
+  end
+  while ft_dataRead_running:
+  sync()
+  ft_dataRead_hex()
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Stopping hex_dataRead thread")
+  end
+  end
+  thread hex_start_watchdog_thread():
+  sleep(1)
+  on_set_rtde_watchdog(updateHz=5,ftWD=True)
+  end
+
+  #======    End of OnRobot HEX Interface    ======#
+  #======    OnRobot RG Interface    ======#
+
+  rg_dataRead_running=False
+  RG_DATA_LENGTH_FLOAT=6
+  RG_DATA_LENGTH_INT=1
+  RG_DATA_LENGTH_BOOL=6
+  rg_index_shift_float=0
+  rg_index_shift_int=0
+  rg_index_shift_bool=0
+  def rg_dataRead_RTDE():
+  local tool_index=rg_index
+  if(tool_index==ON_DI_DUAL):
+  tool_index=ON_DI_SECONDARY
+  rg_index_shift_float=ON_DEVICE_SHIFT_FLOAT
+  rg_index_shift_int=ON_DEVICE_SHIFT_INT
+  rg_index_shift_bool=ON_DEVICE_SHIFT_BOOL
+  enter_critical
+  floatRegDummy=read_input_float_register(rg_index_shift_float+12+on_floatRegShift)
+  rg_Width_arr[tool_index]=floatRegDummy
+  floatRegDummy=read_input_float_register(rg_index_shift_float+13+on_floatRegShift)
+  rg_Depth_arr[tool_index]=floatRegDummy
+  floatRegDummy=read_input_float_register(rg_index_shift_float+14+on_floatRegShift)
+  rg_DepthRel_arr[tool_index]=floatRegDummy
+  intRegDummy=read_input_integer_register(rg_index_shift_int+3+on_intRegShift)
+  rg_Device_ID_arr[tool_index]=intRegDummy
+  intRegDummy=read_input_integer_register(rg_index_shift_int+4+on_intRegShift)
+  rg_Status_arr[tool_index]=intRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+1+on_boolRegShift)
+  rg_Busy_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+2+on_boolRegShift)
+  rg_Grip_detected_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+3+on_boolRegShift)
+  rg_S1_pushed_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+4+on_boolRegShift)
+  rg_S1_triggered_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+5+on_boolRegShift)
+  rg_S2_pushed_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+6+on_boolRegShift)
+  rg_S2_triggered_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+7+on_boolRegShift)
+  rg_Safety_error_arr[tool_index]=boolRegDummy
+  exit_critical
+  tool_index=ON_DI_PRIMARY
+  rg_index_shift_float=0
+  rg_index_shift_int=0
+  rg_index_shift_bool=0
+  else:
+  if(tool_index==ON_DI_SINGLE):
+  local toolIndexShift=0
+  else:
+  local toolIndexShift=tool_index-1
+  end
+  rg_index_shift_float=ON_DEVICE_SHIFT_FLOAT*toolIndexShift
+  rg_index_shift_int=ON_DEVICE_SHIFT_INT*toolIndexShift
+  rg_index_shift_bool=ON_DEVICE_SHIFT_BOOL*toolIndexShift
+  end
+  enter_critical
+  floatRegDummy=read_input_float_register(rg_index_shift_float+12+on_floatRegShift)
+  rg_Width_arr[tool_index]=floatRegDummy
+  floatRegDummy=read_input_float_register(rg_index_shift_float+13+on_floatRegShift)
+  rg_Depth_arr[tool_index]=floatRegDummy
+  floatRegDummy=read_input_float_register(rg_index_shift_float+14+on_floatRegShift)
+  rg_DepthRel_arr[tool_index]=floatRegDummy
+  intRegDummy=read_input_integer_register(rg_index_shift_int+3+on_intRegShift)
+  rg_Device_ID_arr[tool_index]=intRegDummy
+  intRegDummy=read_input_integer_register(rg_index_shift_int+4+on_intRegShift)
+  rg_Status_arr[tool_index]=intRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+1+on_boolRegShift)
+  rg_Busy_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+2+on_boolRegShift)
+  rg_Grip_detected_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+3+on_boolRegShift)
+  rg_S1_pushed_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+4+on_boolRegShift)
+  rg_S1_triggered_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+5+on_boolRegShift)
+  rg_S2_pushed_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+6+on_boolRegShift)
+  rg_S2_triggered_arr[tool_index]=boolRegDummy
+  boolRegDummy=read_input_boolean_register(rg_index_shift_bool+7+on_boolRegShift)
+  rg_Safety_error_arr[tool_index]=boolRegDummy
+  exit_critical
+  end
+  thread rg_dataRead_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Starting rg_dataRead thread")
+  end
+  while rg_dataRead_running:
+  sync()
+  rg_Depth_prev_arr=rg_Depth_arr
+  rg_dataRead_RTDE()
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Stopping rg_dataRead thread")
+  end
+  end
+  thread rg_start_watchdog_thread():
+  sleep(1)
+  on_set_rtde_watchdog(updateHz=5,gripperWD=rg_index)
+  end
+
+  #======    End of OnRobot RG Interface    ======#
+  #======    OnRobot TCP Messages    ======#
+
+  on_tcp_log_msg_default="OnRobot: Roboter-TCP-Versatz:"
+  on_tcp_log_msg_primary="OnRobot: Roboter-TCP-Versatz primär:"
+  on_tcp_log_msg_secondary="OnRobot: Roboter-TCP-Versatz sekundär:"
+
+  #======    End of OnRobot TCP Messages    ======#
+  #======    OnRobot TCP    ======#
+
+  on_tcp_offset_actual=ON_ZEROFRAME
+  on_tcp_offset_primary=ON_ZEROFRAME
+  on_tcp_static_primary=ON_ZEROFRAME
+  on_tcp_dynamic_primary=ON_ZEROFRAME
+  on_tcp_vision_primary=ON_ZEROFRAME
+  on_tcp_qc_primary=ON_ZEROFRAME
+  on_tcp_base_primary=ON_ZEROFRAME
+  on_tcp_gripper_static_primary=ON_ZEROFRAME
+  on_tcp_tool_primary=ON_ZEROFRAME
+  on_tcp_gripper_dynamic_primary=ON_ZEROFRAME
+  on_tcp_gripper_primary=ON_ZEROFRAME
+  on_tcp_offset_secondary=ON_ZEROFRAME
+  on_tcp_static_secondary=ON_ZEROFRAME
+  on_tcp_dynamic_secondary=ON_ZEROFRAME
+  on_tcp_vision_secondary=ON_ZEROFRAME
+  on_tcp_qc_secondary=ON_ZEROFRAME
+  on_tcp_base_secondary=ON_ZEROFRAME
+  on_tcp_gripper_static_secondary=ON_ZEROFRAME
+  on_tcp_tool_secondary=ON_ZEROFRAME
+  on_tcp_gripper_dynamic_secondary=ON_ZEROFRAME
+  on_tcp_gripper_secondary=ON_ZEROFRAME
+  def on_tcp_update_primary():
+  if ON_DEBUG_LOG:
+  textmsg("TCP Update Primary start..")
+  end
+  on_tcp_gripper_dynamic_primary=rg_tcp_dynamic_get(0)
+  enter_critical
+  on_tcp_dynamic_primary=pose_trans(on_tcp_static_primary,on_tcp_gripper_dynamic_primary)
+  on_tcp_offset_primary=pose_trans(on_tcp_dynamic_primary,on_tcp_tool_primary)
+  exit_critical
+  if ON_DEBUG_LOG:
+  textmsg("TCP Update Primary end.")
+  end
+  end
+  def on_tcp_init_primary():
+  if ON_DEBUG_LOG:
+  textmsg("TCP Init Primary start..")
+  end
+  enter_critical
+  on_tcp_base_primary=pose_trans(on_tcp_vision_primary,on_tcp_qc_primary)
+  on_tcp_static_primary=pose_trans(on_tcp_base_primary,on_tcp_gripper_static_primary)
+  exit_critical
+  on_tcp_update_primary()
+  if ON_DEBUG_LOG:
+  textmsg("TCP Init Primary end.")
+  end
+  end
+  def on_tcp_offset_set(TCP_offset):
+  if ON_DEBUG_LOG:
+  textmsg("TCP Offset set started!")
+  end
+  on_tcp_offset_send(TCP_offset)
+  if(on_follow_tcp):
+  set_tcp(TCP_offset)
+  end
+  on_robot_TCP_offset=TCP_offset
+  if ON_DEBUG_LOG:
+  textmsg("TCP Offset set to: ",on_robot_TCP_offset)
+  end
+  end
+  def on_tcp_offset_forced_set_actual(isPrimary=True):
+  if(not on_follow_tcp):
+
+  local tcp_log_msg=on_tcp_log_msg_default
+
+  textmsg(tcp_log_msg,on_tcp_offset_actual)
+  set_tcp(on_tcp_offset_actual)
+  end
+  end
+  def on_tcp_update(isPrimary=True):
+  on_tcp_update_primary()
+
+  on_tcp_set_actual_to(isPrimary)
+  end
+  def on_tcp_set_actual_to(isPrimary=True):
+
+  on_tcp_offset_actual=on_tcp_offset_primary
+  if(on_follow_tcp):
+  textmsg(on_tcp_log_msg_default,on_tcp_offset_actual)
+  end
+
+  on_tcp_active_is_primary=isPrimary
+  on_tcp_offset_set(on_tcp_offset_actual)
+  end
+  def on_tcp_update_tool_primary(tool_offset):
+  if ON_DEBUG_LOG:
+  textmsg("TCP Update Tool Primary start..")
+  end
+  on_tcp_tool_primary=tool_offset
+  on_tcp_update_primary()
+  if ON_DEBUG_LOG:
+  textmsg("TCP Update Tool Primary end.")
+  end
+  end
+  def on_tcp_tool_rpy_get(xyz=[0.0,0.0,0.0],rpy=[0.0,0.0,0.0]):
+  local rotvec=rpy2rotvec(rpy)
+  local tool_offset=p[xyz[0],xyz[1],xyz[2],rotvec[0],rotvec[1],rotvec[2]]
+  return tool_offset
+  end
+
+  def on_tcp_update_tool(tool_offset,tool_index=0):
+  if ON_DEBUG_LOG:
+  textmsg("TCP Update Tool start..")
+  end
+  if(tool_index!=ON_DI_SECONDARY):
+  on_tcp_update_tool_primary(tool_offset)
+  local isPrimary=True
+
+  end
+  on_tcp_set_actual_to(isPrimary)
+  if ON_DEBUG_LOG:
+  textmsg("TCP Update Tool end.")
+  end
+  end
+
+  #======    End of OnRobot TCP    ======#
+  #======    OnRobot Payload Messages    ======#
+
+  on_mass_log_msg="OnRobot: Roboter-Nutzlastmasse:"
+  on_cog_log_msg="OnRobot: Schwerpunkt der Roboter-Nutzlastmasse:"
+
+  #======    End of OnRobot Payload Messages    ======#
+  #======    OnRobot Payload    ======#
+
+  on_cog_actual=ON_ZEROFRAME
+  on_mass_actual=0.0
+  on_cog_primary=ON_ZEROFRAME
+  on_cog_L1L2_primary=ON_ZEROFRAME
+  on_mass_primary=0.0
+  on_mass_L1L2_primary=0.0
+  on_cog_vision_primary=ON_ZEROFRAME
+  on_cog_qc_primary=ON_ZEROFRAME
+  on_cog_base_primary=ON_ZEROFRAME
+  on_cog_gripper_primary=ON_ZEROFRAME
+  on_cog_tool_primary=ON_ZEROFRAME
+  on_mass_vision_primary=0.0
+  on_mass_qc_primary=0.0
+  on_mass_base_primary=0.0
+  on_mass_gripper_primary=0.0
+  on_mass_tool_primary=0.0
+  on_cog_secondary=ON_ZEROFRAME
+  on_mass_secondary=0.0
+  on_cog_gripper_secondary=ON_ZEROFRAME
+  on_mass_gripper_secondary=0.0
+  on_cog_tool_secondary=ON_ZEROFRAME
+  on_mass_tool_secondary=0.0
+  ON_LB2KG001=0.45359237/100
+  def on_payload_update_primary():
+  if ON_DEBUG_LOG:
+  textmsg("Payload Update Primary start..")
+  end
+  enter_critical
+  on_mass_primary=on_mass_L1L2_primary+on_mass_tool_primary
+  local massL1L2L3Ratio=on_mass_tool_primary/on_mass_primary
+  local toolAbsCOG=pose_trans(on_tcp_dynamic_primary,on_cog_tool_primary)
+  toolAbsCOG=p[toolAbsCOG[0],toolAbsCOG[1],toolAbsCOG[2],0.0,0.0,0.0]
+  on_cog_primary=interpolate_pose(on_cog_L1L2_primary,toolAbsCOG,massL1L2L3Ratio)
+  on_cog_primary=p[on_cog_primary[0],on_cog_primary[1],on_cog_primary[2],0.0,0.0,0.0]
+  exit_critical
+  if ON_DEBUG_LOG:
+  textmsg("Payload Update Primary end.")
+  end
+  end
+  def on_payload_init_primary():
+  if ON_DEBUG_LOG:
+  textmsg("Payload Init Primary start..")
+  end
+  enter_critical
+  on_mass_base_primary=on_mass_vision_primary+on_mass_qc_primary
+  local massL0L1Ratio=on_mass_qc_primary/on_mass_base_primary
+  on_mass_L1L2_primary=on_mass_base_primary+on_mass_gripper_primary
+  local massL1L2Ratio=on_mass_gripper_primary/on_mass_L1L2_primary
+  local qcAbsCOG=pose_trans(on_tcp_vision_primary,on_cog_qc_primary)
+  qcAbsCOG=p[qcAbsCOG[0],qcAbsCOG[1],qcAbsCOG[2],0.0,0.0,0.0]
+  on_cog_base_primary=interpolate_pose(on_cog_vision_primary,qcAbsCOG,massL0L1Ratio)
+  on_cog_base_primary=p[on_cog_base_primary[0],on_cog_base_primary[1],on_cog_base_primary[2],0.0,0.0,0.0]
+  local gripperAbsCOG=pose_trans(on_tcp_base_primary,on_cog_gripper_primary)
+  gripperAbsCOG=p[gripperAbsCOG[0],gripperAbsCOG[1],gripperAbsCOG[2],0.0,0.0,0.0]
+  on_cog_L1L2_primary=interpolate_pose(on_cog_base_primary,gripperAbsCOG,massL1L2Ratio)
+  on_cog_L1L2_primary=p[on_cog_L1L2_primary[0],on_cog_L1L2_primary[1],on_cog_L1L2_primary[2],0.0,0.0,0.0]
+  exit_critical
+  on_payload_update_primary()
+  if ON_DEBUG_LOG:
+  textmsg("Payload Init Primary end.")
+  end
+  end
+  def on_payload_update():
+  on_payload_update_primary()
+
+  on_mass_actual =on_mass_primary
+  on_cog_actual=on_cog_primary
+
+  on_payload_set_actual()
+  end
+  def on_payload_set_actual():
+
+  on_mass_actual =on_mass_primary
+  on_cog_actual=on_cog_primary
+
+  local CoG=[on_cog_actual[0],on_cog_actual[1],on_cog_actual[2]]
+  on_payload_set(on_mass_actual,CoG)
+  end
+  def on_payload_update_tool_primary(tool_mass=0,tool_cog=[0.0,0.0,0.0]):
+  if ON_DEBUG_LOG:
+  textmsg("Payload Update Tool Primary start..")
+  end
+  on_cog_tool_primary=p[tool_cog[0],tool_cog[1],tool_cog[2],0.0,0.0,0.0]
+  on_mass_tool_primary=tool_mass
+  on_payload_update_primary()
+  if ON_DEBUG_LOG:
+  textmsg("Payload Update Tool Primary end.")
+  end
+  end
+  def on_payload_set(mass,CoG):
+  if ON_DEBUG_LOG:
+  textmsg("Payload set started!")
+  end
+  local center_of_gravity=[CoG[0],CoG[1],CoG[2]]
+  on_payload_send(center_of_gravity,mass)
+  if(on_isMetric):
+  local roundedMass=floor(mass*100+0.5)/100
+  else:
+  local roundedMass=floor(mass/ON_LB2KG001+0.5)*ON_LB2KG001
+  end
+  set_payload(roundedMass,center_of_gravity)
+  on_mass_actual=roundedMass
+  on_cog_actual=p[CoG[0],CoG[1],CoG[2],0.0,0.0,0.0]
+  if ON_DEBUG_LOG:
+  textmsg("Payload mass, CoG set to: ",str_cat(str_cat(mass,", "),CoG))
+  end
+  end
+
+  def on_payload_update_secondary():
+  end
+  def on_payload_init_secondary():
+  end
+
+  def on_payload_update_tool(tool_mass,tool_cog=[0.0,0.0,0.0],tool_index=0):
+  if ON_DEBUG_LOG:
+  textmsg("Payload Update Tool start..")
+  end
+  if(tool_index!=ON_DI_SECONDARY):
+  on_cog_tool_primary=p[tool_cog[0],tool_cog[1],tool_cog[2],0.0,0.0,0.0]
+  on_mass_tool_primary=tool_mass
+  else:
+  on_cog_tool_secondary=p[tool_cog[0],tool_cog[1],tool_cog[2],0.0,0.0,0.0]
+  on_mass_tool_secondary=tool_mass
+  end
+  on_payload_update()
+  if ON_DEBUG_LOG:
+  textmsg("Payload Update Tool end.")
+  end
+  end
+  def on_payload_get_cog2tcp_tool(tool_index=0):
+  if(tool_index!=ON_DI_SECONDARY):
+  local cog_tool=[on_tcp_tool_primary[0],on_tcp_tool_primary[1],on_tcp_tool_primary[2]]
+  else:
+  local cog_tool=[on_tcp_tool_secondary[0],on_tcp_tool_secondary[1],on_tcp_tool_secondary[2]]
+  end
+  return cog_tool
+  end
+
+  #======    End of OnRobot Payload    ======#
+  #======    OnRobot FT TCP    ======#
+
+  def on_tcp_offset_send(TCP_offset):
+  if ON_DEBUG_LOG:
+  textmsg("TCP Offset sending started!")
+  end
+  local offset=[TCP_offset[0]*1000.0,TCP_offset[1]*1000.0,TCP_offset[2]*1000.0,TCP_offset[3],TCP_offset[4],TCP_offset[5]]
+  on_xmlrpc.cb_tcp(offset)
+  on_robot_TCP_offset=TCP_offset
+  if ON_DEBUG_LOG:
+  textmsg("TCP Offset sent.")
+  end
+  end
+  def on_payload_send(CoG,mass):
+  if ON_DEBUG_LOG:
+  textmsg("Payload sending started!")
+  end
+  local center_of_gravity=[CoG[0]*1000.0,CoG[1]*1000.0,CoG[2]*1000.0]
+  local mount=[on_robot_mount[0]*1000.0,on_robot_mount[1]*1000.0]
+  on_xmlrpc.cb_payload(mount,mass+0.0,center_of_gravity)
+  on_robot_payload_cog=CoG
+  on_robot_payload_mass=mass
+  if ON_DEBUG_LOG:
+  textmsg("Payload sent.")
+  end
+  end
+
+  #======    End of OnRobot FT TCP    ======#
+  #======    OnRobot RG TCP    ======#
+
+  def rg_mount_tcp(gripper_angle,isRG2=True):
+  if ON_DEBUG_LOG:
+  textmsg("RG Mount TCP command starting..")
+  end
+  if(isRG2):
+  local gripperBracket=rg2_mount_bracket_offset
+  local gripperBody=rg2_mount_body_offset
+  else:
+  local gripperBracket=rg6_mount_bracket_offset
+  local gripperBody=rg6_mount_body_offset
+  end
+  local gripperRotVec=rpy2rotvec([gripper_angle,0.0,0.0])
+  local gripperMountOffset=p[0.0,0.0,gripperBracket,gripperRotVec[0],gripperRotVec[1],gripperRotVec[2]]
+  local gripperOffsetStatic=pose_trans(gripperMountOffset,gripperBody)
+  if ON_DEBUG_LOG:
+  textmsg("RG Mount TCP command ended.")
+  end
+  return gripperOffsetStatic
+  end
+  def rg_mount_cog(gripper_angle,isRG2=True):
+  if ON_DEBUG_LOG:
+  textmsg("RG Mount CoG command starting..")
+  end
+  if(isRG2):
+  local gripperBracket=rg2_mount_bracket_offset
+  local gripperCoG=rg2_mount_cog_offset
+  else:
+  local gripperBracket=rg6_mount_bracket_offset
+  local gripperCoG=rg6_mount_cog_offset
+  end
+  local gripperRotVec=rpy2rotvec([gripper_angle,0.0,0.0])
+  local gripperMountOffset=p[0.0,0.0,gripperBracket,gripperRotVec[0],gripperRotVec[1],gripperRotVec[2]]
+  local gripperCOGOffset=pose_trans(gripperMountOffset,gripperCoG)
+  gripperCOGOffset=p[gripperCOGOffset[0],gripperCOGOffset[1],gripperCOGOffset[2],0.0,0.0,0.0]
+  if ON_DEBUG_LOG:
+  textmsg("RG Mount CoG command ended.")
+  end
+  return gripperCOGOffset
+  end
+  def rg_fcp_depth_calc_frame(tool_index=0):
+  local gripperDepth=rg_Depth_arr[tool_index]
+  local z_offset=-gripperDepth/1000.0
+  return p[0.0,0.0,z_offset,0.0,0.0,0.0]
+  end
+  def rg_tcp_dynamic_get(tool_index=0):
+  local offset=rg_fcp_depth_calc_frame(tool_index)
+  return offset
+  end
+  def rg_payload_set(mass,tool_index=0,use_guard=False):
+  if ON_DEBUG_LOG:
+  textmsg("RG Payload mass command starting..")
+  end
+  if(tool_index==ON_DI_SECONDARY):
+  local cogTool=[on_cog_tool_secondary[0],on_cog_tool_secondary[1],on_cog_tool_secondary[2]]
+  else:
+  local cogTool=[on_cog_tool_primary[0],on_cog_tool_primary[1],on_cog_tool_primary[2]]
+  end
+  if(use_guard and rg_Grip_detected_arr[tool_index]):
+  local mass2set=mass
+  rg_Grip_guard_arr[tool_index]=not on_ioqc
+  else:
+  local mass2set=0.0
+  rg_Grip_guard_arr[tool_index]=False
+  end
+  on_payload_update_tool(mass2set,cogTool,tool_index)
+  if ON_DEBUG_LOG:
+  textmsg("RG Payload mass command ended.")
+  end
+  end
+
+  #======    End of OnRobot RG TCP    ======#
+  #======    OnRobot  Speedl    ======#
+
+  on_speedl_thread_handler=0
+  on_speedl_is_enabled=False
+  on_speedl_is_running=False
+  on_speedl_acc=0.0
+  ft_speedl_hg_caranteen_reached=False
+  ft_speedl_hg_caranteen_safemode=False
+  on_speedl_for_ftcontrol=False
+  on_speedl_for_move=False
+  on_speedl_for_handguide=False
+  on_speedl_for_insertpart=False
+  on_speedl_for_depthcompensation=False
+  on_speedl_for_center=False
+  on_speedl_for_gecko=False
+  on_speedl_acc=10000.0
+  on_speedl_acc_to_zero=3.0
+  ON_SPEEDL_FTCONTROL=1
+  ON_SPEEDL_HANDGUIDE=2
+  ON_SPEEDL_MOVE=3
+  ON_SPEEDL_INSERTPART=4
+  ON_SPEEDL_DEPTHCOMP=5
+  ON_SPEEDL_CENTER=6
+  ON_SPEEDL_GECKO=7
+  def on_speedl_add_extra(speedBase,speedExtra):
+  speedSum=ON_ZERO6D
+  speedBaseP=p[speedBase[0],speedBase[1],speedBase[2],speedBase[3],speedBase[4],speedBase[5]]
+  speedExtraP=p[speedExtra[0],speedExtra[1],speedExtra[2],speedExtra[3],speedExtra[4],speedExtra[5]]
+  speedSumP=pose_add(speedExtraP,speedBaseP)
+  speedSum=[speedSumP[0],speedSumP[1],speedSumP[2],speedSumP[3],speedSumP[4],speedSumP[5]]
+  return speedSum
+  end
+
+  def ft_speedl_hg_caranteen_check(speedBase):
+  if ft_speedl_hg_caranteen_reached:
+  if ft_speedl_hg_caranteen_safemode:
+  local XYplane=get_actual_tool_flange_pose()
+  if(XYplane[0]<0 and speedBase[0]>0)or(XYplane[0]>0 and speedBase[0]<0):
+  speedBase[0]=0
+  end
+  if(XYplane[1]<0 and speedBase[1]>0)or(XYplane[1]>0 and speedBase[1]<0):
+  speedBase[1]=0
+  end
+  else:
+  speedBase=ON_ZERO6D
+  end
+  end
+  return speedBase
+  end
+
+  thread on_speedl_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Speedl thread started..")
+  end
+  enter_critical
+  on_speedl_is_running=True
+  on_speedl_is_enabled=True
+  exit_critical
+  on_speedL=ON_ZERO6D
+
+  while on_speedl_is_running:
+  on_speedBase=on_speedVect_get()
+  on_speedL=on_speedBase
+
+  on_speedExtra=on_speedDC_get()
+  on_speedL=on_speedl_add_extra(on_speedL,on_speedExtra)
+
+
+
+  if on_speedl_for_handguide:
+  on_speedL=ft_speedl_hg_caranteen_check(on_speedL)
+  end
+
+  if on_speedl_is_enabled:
+  speedl(on_speedL,a=on_speedl_acc,t=0.001)
+  else:
+  speedl(ON_ZERO6D,a=on_speedl_acc_to_zero,t=0.001)
+  end
+  end
+
+  on_speedL=ON_ZERO6D
+  if ON_DEBUG_LOG:
+  textmsg("Speedl thread ended.")
+  end
+  end
+  def on_speedl_integer_get():
+  local speedl_integer=binary_list_to_integer([on_speedl_for_ftcontrol,on_speedl_for_handguide,on_speedl_for_move,on_speedl_for_insertpart,on_speedl_for_depthcompensation,on_speedl_for_center,on_speedl_for_gecko])
+  return speedl_integer
+  end
+  def on_speedl_start_for(speedl_id):
+  if(speedl_id==ON_SPEEDL_FTCONTROL):
+  on_speedl_for_ftcontrol=True
+  elif(speedl_id==ON_SPEEDL_HANDGUIDE):
+  on_speedl_for_handguide=True
+  elif(speedl_id==ON_SPEEDL_MOVE):
+  on_speedl_for_move=True
+  elif(speedl_id==ON_SPEEDL_INSERTPART):
+  on_speedl_for_insertpart=True
+  elif(speedl_id==ON_SPEEDL_DEPTHCOMP):
+  on_speedl_for_depthcompensation=True
+  elif(speedl_id==ON_SPEEDL_CENTER):
+  on_speedl_for_center=True
+  elif(speedl_id==ON_SPEEDL_GECKO):
+  on_speedl_for_gecko=True
+  else:
+  textmsg("Unknown Start speedl ID received: ",speedl_id)
+  end
+  local speedl_integer=on_speedl_integer_get()
+  if not(speedl_integer==0):
+  if not on_speedl_is_running:
+  on_speedl_thread_handler=run on_speedl_thread()
+  end
+  end
+  return on_speedl_is_running
+  end
+  def on_speedl_stop_for(speedl_id,brake=10):
+  if(speedl_id==ON_SPEEDL_FTCONTROL):
+  on_speedl_for_ftcontrol=False
+  elif(speedl_id==ON_SPEEDL_HANDGUIDE):
+  on_speedl_for_handguide=False
+  elif(speedl_id==ON_SPEEDL_MOVE):
+  on_speedl_for_move=False
+  elif(speedl_id==ON_SPEEDL_INSERTPART):
+  on_speedl_for_insertpart=False
+  elif(speedl_id==ON_SPEEDL_DEPTHCOMP):
+  on_speedl_for_depthcompensation=False
+  on_speedDC_set(ON_ZERO6D)
+  elif(speedl_id==ON_SPEEDL_CENTER):
+  on_speedl_for_center=False
+  elif(speedl_id==ON_SPEEDL_GECKO):
+  on_speedl_for_gecko=False
+  on_speedGecko_set(ON_ZERO6D)
+  else:
+  textmsg("Unknown Stop speedl ID received: ",speedl_id)
+  end
+  local speedl_integer=on_speedl_integer_get()
+  if(speedl_integer==0):
+  if(on_speedl_is_running):
+  kill on_speedl_thread_handler
+  enter_critical
+  on_speedl_is_running=False
+  exit_critical
+
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Speedl thread stopped")
+  end
+  stopl(brake)
+  end
+  return on_speedl_is_running
+  end
+  def on_speedl_pause():
+  on_speedl_is_enabled=False
+  return on_speedl_integer_get()
+  end
+  def on_speedl_resume():
+  on_speedl_is_enabled=True
+  return on_speedl_integer_get()
+  end
+  def on_wait_ms(time_ms):
+  local sync_time=ceil(norm(time_ms/8.0))
+  while(sync_time>0):
+  sync_time=sync_time-1
+  sync()
+  end
+  end
+
+  #======    End of OnRobot  Speedl    ======#
+  #======    OnRobot Engine Messages    ======#
+
+  hex_sensor_id_waiting="Warten auf eine gültige OnRobot Sensor-ID von der Compute Box IP:"
+  hex_sensor_id_timeout="Zeitüberschreitung beim Warten auf OnRobot-Sensor-ID.<br>Programm angehalten."
+  hex_sensor_error_title="OnRobot-Sensorfehler"
+  hex_sensor_error_type="Kein oder unbekannter Sensor angeschlossen.<br>Siehe Beschreibung der Compute Box auf dem OnRobot USB-Stick."
+  hex_sensor_error_mixed="Der Sensortyp stimmt nicht mit dem URCap-Modus überein.<br>Bitte stellen Sie auf der Registerkarte „Installation“ sicher, dass die richtigen Einstellungen für Compute Box und Sensor/Greifer vorgenommen wurden, und starten Sie den Roboter bei Bedarf neu."
+  hex_sensor_warning_title="OnRobot-Sensorwarnung:"
+  hex_sensor_else_error="Unbekannte(r) Fehlercode(s).<br>Verbinden Sie sich mit dem Compute-Box-Webzugang und analysieren Sie das STATUS-Wort. Siehe Beschreibung der Compute Box auf dem OnRobot-USB-Stick"
+  hex_sensor_status_msg="Sensorstatus:"
+  hex_sensor_bit0_error="Kein Sensor angeschlossen.<br>Schalten Sie die Compute Box aus, verbinden Sie den Sensor über ein unbeschädigtes Kabel mit der Compute Box und schalten Sie die Compute Box wieder ein. Wenn der Fehler weiterhin besteht, wenden Sie sich an Ihren Händler."
+  hex_sensor_bit1_error="Der Sensor reagiert nicht.<br>Schalten Sie die Compute Box aus, verbinden Sie den Sensor über ein unbeschädigtes Kabel mit der Compute Box und schalten Sie die Compute Box wieder ein. Wenn der Fehler weiterhin besteht, wenden Sie sich an Ihren Händler."
+  hex_sensor_bit2_error="Sensorausfall.<br>Erfassen Sie Informationen zur Situation, in der dieser Fehler aufgetreten ist, und kontaktieren Sie Ihren Händler."
+  hex_sensor_bit3_error="Fehler bei der Sensor-Stromversorgung oder im EEPROM.<br>Erfassen Sie Informationen zur Situation, in der dieser Fehler aufgetreten ist, und wenden Sie sich an Ihren Händler oder an OnRobot."
+  hex_sensor_bit4_error="Kommunikationsfehler zwischen dem Sensor und der Compute Box.<br>Schalten Sie die Compute Box aus, verbinden Sie den Sensor über ein unbeschädigtes Kabel mit der Compute Box und schalten Sie die Compute Box wieder ein. Wenn der Fehler weiterhin besteht, wenden Sie sich an Ihren Händler."
+  hex_sensor_bit5_error="Sensorkraft-Überlastfehler.<br>Beseitigen Sie die Umstände, die eine Überlastung des Sensors verursachen, d. h. entlasten Sie den Sensor."
+  hex_sensor_bit6_error="Sensordrehmoment-Überlastfehler.<br>Beseitigen Sie die Umstände, die eine Überlastung des Sensors verursachen, d. h. entlasten Sie den Sensor.“"
+  hex_sensor_bit7_warning="Sensorüberlastwarnung erreicht. Verringern Sie Kraft/Drehmoment, um Schäden zu vermeiden."
+  hex_sensor_bit8_error="Sensorüberlastgrenze aktiviert.<br>Zur Vermeidung von Schäden Kraft/Drehmoment verringern.<br>Programm angehalten."
+
+  #======    End of OnRobot Engine Messages    ======#
+  #======    OnRobot HEX Engine    ======#
+
+  def ft_dataProcess_errors_hex(sensor_stop=False):
+  if(ft_Status_hex!=0):
+  local sensor_status_bits=integer_to_binary_list(ft_Status_hex)
+  sensor_stop=on_error(sensor_status_bits[0],hex_sensor_bit0_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error(sensor_status_bits[1],hex_sensor_bit1_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error(sensor_status_bits[2],hex_sensor_bit2_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error(sensor_status_bits[3],hex_sensor_bit3_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error(sensor_status_bits[4],hex_sensor_bit4_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error(sensor_status_bits[5],hex_sensor_bit5_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error(sensor_status_bits[6],hex_sensor_bit6_error,hex_sensor_error_title,sensor_stop)
+  on_warning(sensor_status_bits[7],hex_sensor_bit7_warning,hex_sensor_warning_title)
+  sensor_stop=on_error(sensor_status_bits[8],hex_sensor_bit8_error,hex_sensor_error_title,sensor_stop)
+  sensor_stop=on_error((ft_Status_hex>511),hex_sensor_else_error,hex_sensor_error_title,sensor_stop)
+  textmsg(hex_sensor_status_msg,ft_Status_hex)
+  end
+  return sensor_stop
+  end
+  thread ft_dataProcess_hex_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Starting dataProcess thread")
+  end
+  while ft_dataProcess_running:
+  sync()
+  local sensor_stop=False
+  if(ft_Sensor_ID==FT_SENSOR_ID_HEX_V1 or ft_Sensor_ID==FT_SENSOR_ID_HEX_V2 or ft_Sensor_ID==FT_SENSOR_ID_HEX_V3):
+  on_hex=True
+  elif(ft_Sensor_ID==FT_SENSOR_ID_RG2FT_V0 or ft_Sensor_ID==FT_SENSOR_ID_RG2FT_V1 or ft_Sensor_ID==FT_SENSOR_ID_RG2FT_V2):
+  on_hex=False
+  elif(ft_Sensor_ID==FT_SENSOR_ID_UNDEFINED):
+  if(ft_has_valid_ID):
+  textmsg("Sensor type ID: ",ft_Sensor_ID)
+  popup(hex_sensor_bit1_error,title=hex_sensor_error_title,error=True,blocking=False)
+  halt
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Establishing connection with the sensor.. Undefined sensor: ",ft_Sensor_ID)
+  end
+  else:
+  textmsg("Sensor type ID: ",ft_Sensor_ID)
+  popup(hex_sensor_error_type,title=hex_sensor_error_title,error=True,blocking=False)
+  halt
+  end
+  sensor_stop=on_error(((True)xor(on_hex)),hex_sensor_error_mixed,hex_sensor_error_title,sensor_stop)
+  sensor_stop=ft_dataProcess_errors_hex(sensor_stop)
+  if sensor_stop:
+  halt
+  end
+
+  local tcp_transform=on_robot_TCP_offset
+  tcp_transform[0]=0
+  tcp_transform[1]=0
+  tcp_transform[2]=0
+  tcp_transform=pose_inv(tcp_transform)
+  local tcpF=pose_trans(tcp_transform,p[FT_hex[0],FT_hex[1],FT_hex[2],0,0,0])
+  local tcpT=pose_trans(tcp_transform,p[FT_hex[3],FT_hex[4],FT_hex[5],0,0,0])
+  Fx=tcpF[0]
+  Fy=tcpF[1]
+  Fz=tcpF[2]
+  Tx=tcpT[0]
+  Ty=tcpT[1]
+  Tz=tcpT[2]
+  F3D=norm([Fx,Fy,Fz])
+  T3D=norm([Tx,Ty,Tz])
+  local act_transform=get_actual_tool_flange_pose()
+  act_transform[0]=0
+  act_transform[1]=0
+  act_transform[2]=0
+  local bF=pose_trans(act_transform,p[FT_hex[0],FT_hex[1],FT_hex[2],0,0,0])
+  local bT=pose_trans(act_transform,p[FT_hex[3],FT_hex[4],FT_hex[5],0,0,0])
+  FT_Base=[bF[0],bF[1],bF[2],bT[0],bT[1],bT[2]]
+  FT_Tool=[Fx,Fy,Fz,Tx,Ty,Tz]
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Stopping dataProcess thread")
+  end
+  end
+
+  #======    End of OnRobot HEX Engine    ======#
+  #======    OnRobot RG Engine Messages    ======#
+
+  rg_error_title="OnRobot - RG-Fehler"
+  rg_device_id_waiting="Warte auf gültige OnRobot RG ID..."
+  rg_device_id_timeout="Zeitüberschreitung beim Warten auf OnRobot-RG-ID.<br>Programm angehalten."
+  rg_data_error_title="OnRobot - RG-Datenfehler"
+  rg_data_error_type="Kein oder unbekannter Greifer angeschlossen."
+  rg_data_warning_title="OnRobot - RG-Datenwarnung"
+  rg_status_error_title="OnRobot - RG-Statusfehler"
+  rg_status_error_missing="Kommunikationsproblem mit einem RG-Greifer. Gerät überprüfen.<br>Programm angehalten."
+  rg_else_error="Unbekannter Fehlercode:"
+  rg_status_msg_single="RG-Status:"
+  rg_data_error_bit0_single="Falsche Größe der empfangenen Float-Daten."
+  rg_data_error_bit1_single="Falsche Größe der empfangenen Integer-Daten."
+  rg_data_error_bit2_single="Falsche Größe der empfangenen booleschen Daten."
+  rg_status_error_mismatch_single="Der Status des RG stimmt nicht mit dem Status seines Sicherheitsschalters überein."
+  rg_status_error_s1_triggered_single="Der Sicherheitsschalter S1 wurde ausgelöst.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_error_s1_pushed_single="Der Sicherheitsschalter S1 wurde gedrückt."
+  rg_status_error_s2_triggered_single="Der Sicherheitsschalter S2 wurde ausgelöst.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_error_s2_pushed_single="Der Sicherheitsschalter S2 wurde gedrückt."
+  rg_status_error_safety_system_single="Fehler im Sicherheitssystem aufgetreten.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_msg_primary="RG Primärstatus:"
+  rg_data_error_bit0_primary="Falsche Größe der Float-Daten, die für den primären RG empfangen wurden."
+  rg_data_error_bit1_primary="Falsche Größe der empfangenen Integer-Daten für primären RG."
+  rg_data_error_bit2_primary="Falsche Größe der empfangenen booleschen Daten für primären RG."
+  rg_status_error_mismatch_primary="Der primäre Status des RG stimmt nicht mit dem Status seines Sicherheitsschalters überein."
+  rg_status_error_s1_pushed_primary="Der Sicherheitsschalter S1 am primären RG wurde gedrückt."
+  rg_status_error_s1_triggered_primary="Der Sicherheitsschalter S1 am primären RG wurde ausgelöst.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_error_s2_pushed_primary="Der Sicherheitsschalter S2 am primären RG wurde gedrückt."
+  rg_status_error_s2_triggered_primary="Der Sicherheitsschalter S2 am primären RG wurde ausgelöst.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_error_safety_system_primary="Fehler im Sicherheitssystem aufgetreten.<br>Bitte starten Sie den primären RG-Greifer neu."
+  rg_status_msg_secondary="RG Sekundärstatus:"
+  rg_data_error_bit0_secondary="Falsche Größe der Float-Daten, die für sekundären RG empfangen wurden."
+  rg_data_error_bit1_secondary="Falsche Größe der empfangenen Integer-Daten für sekundären RG."
+  rg_data_error_bit2_secondary="Falsche Größe der empfangenen booleschen Daten für sekundären RG."
+  rg_status_error_mismatch_secondary="Der sekundäre Status des RG stimmt nicht mit dem Status seines Sicherheitsschalters überein."
+  rg_status_error_s1_pushed_secondary="Der Sicherheitsschalter S1 am sekundären RG wurde gedrückt."
+  rg_status_error_s1_triggered_secondary="Der Sicherheitsschalter S1 am sekundären RG wurde ausgelöst.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_error_s2_pushed_secondary="Der Sicherheitsschalter S2 am sekundären RG wurde gedrückt."
+  rg_status_error_s2_triggered_secondary="Der Sicherheitsschalter S2 am sekundären RG wurde ausgelöst.<br>Bitte starten Sie den RG-Greifer neu."
+  rg_status_error_safety_system_secondary="Der Sicherheitssystemfehler.<br>Bitte starten Sie den sekundären RG-Greifer neu."
+
+  #======    End of OnRobot RG Engine Messages    ======#
+  #======    OnRobot RG Engine    ======#
+
+  rg_dataProcess_running=False
+  rg_start_flange=ON_ZEROPOSE
+  rg_start_pose=ON_ZEROPOSE
+  RG_STATUS_IGNORE_SHIFT=4
+  rg_status_warning_title=str_cat(rg_status_error_title,": ")
+  def rg_status_int_get(tool_index):
+  local status_int=binary_list_to_integer([rg_S1_pushed_arr[tool_index],rg_S1_triggered_arr[tool_index],rg_S2_pushed_arr[tool_index],rg_S2_triggered_arr[tool_index],rg_Safety_error_arr[tool_index]])
+  return status_int
+  end
+  def rg_dataProcess_status_errors(rg_stop=False):
+  enter_critical
+  local tool_index=rg_index
+  if(tool_index==ON_DI_DUAL):
+  tool_index=ON_DI_SECONDARY
+  rg_stop=on_error((rg_Device_ID_arr[tool_index]==ON_DEVICE_ID_MISSING),rg_status_error_missing,rg_status_error_title,rg_stop)
+  tool_index=ON_DI_PRIMARY
+  end
+  rg_stop=on_error((rg_Device_ID_arr[tool_index]==ON_DEVICE_ID_MISSING),rg_status_error_missing,rg_status_error_title,rg_stop)
+
+  local switch_error_single=rg_status_int_get(tool_index)
+  local status_error_single=floor(rg_Status_arr[tool_index]/RG_STATUS_IGNORE_SHIFT)
+  if(status_error_single!=switch_error_single):
+  on_warning(((status_error_single-switch_error_single)>0),str_cat(rg_else_error,rg_Status_arr[tool_index]),rg_status_warning_title)
+  end
+  if(switch_error_single!=0):
+  rg_stop=on_error(rg_S1_pushed_arr[tool_index],rg_status_error_s1_pushed_single,rg_status_error_title,rg_stop)
+  rg_stop=on_error(rg_S1_triggered_arr[tool_index],rg_status_error_s1_triggered_single,rg_status_error_title,rg_stop)
+  rg_stop=on_error(rg_S2_pushed_arr[tool_index],rg_status_error_s2_pushed_single,rg_status_error_title,rg_stop)
+  rg_stop=on_error(rg_S2_triggered_arr[tool_index],rg_status_error_s2_triggered_single,rg_status_error_title,rg_stop)
+  rg_stop=on_error(rg_Safety_error_arr[tool_index],rg_status_error_safety_system_single,rg_status_error_title,rg_stop)
+  end
+
+  exit_critical
+  return rg_stop
+  end
+  def rg_dataProcess():
+  enter_critical
+  local tool_index=rg_index
+  if tool_index==ON_DI_DUAL:
+  rg_Width_primary=rg_Width_arr[ON_DI_PRIMARY]
+  rg_Depth_primary=rg_Depth_arr[ON_DI_PRIMARY]
+  rg_DepthRel_primary=rg_DepthRel_arr[ON_DI_PRIMARY]
+  rg_Busy_primary=rg_Busy_arr[ON_DI_PRIMARY]
+  rg_Grip_detected_primary=rg_Grip_detected_arr[ON_DI_PRIMARY]
+  rg_Width_secondary=rg_Width_arr[ON_DI_SECONDARY]
+  rg_Depth_secondary=rg_Depth_arr[ON_DI_SECONDARY]
+  rg_DepthRel_secondary=rg_DepthRel_arr[ON_DI_SECONDARY]
+  rg_Busy_secondary=rg_Busy_arr[ON_DI_SECONDARY]
+  rg_Grip_detected_secondary=rg_Grip_detected_arr[ON_DI_SECONDARY]
+  else:
+  rg_Width=rg_Width_arr[tool_index]
+  rg_Depth=rg_Depth_arr[tool_index]
+  rg_DepthRel=rg_DepthRel_arr[tool_index]
+  rg_Busy=rg_Busy_arr[tool_index]
+  rg_Grip_detected=rg_Grip_detected_arr[tool_index]
+  end
+  on_speedDC_set(ON_ZERO6D)
+  exit_critical
+  end
+  thread rg_dataProcess_thread():
+  if ON_DEBUG_LOG:
+  textmsg("Starting rg_dataProcess thread")
+  end
+  while rg_dataProcess_running:
+  sync()
+  local rg_stop=False
+  rg_stop=rg_dataProcess_status_errors(rg_stop)
+  if rg_stop:
+  halt
+  end
+  rg_dataProcess()
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Stopping rg_dataProcess thread")
+  end
+  end
+  def rg_index_get():
+  return rg_index
+  end
+
+  #======    End of OnRobot RG Engine    ======#
+  rg_mounting_angle_arr[0] = 0.0
+  rg_fingertip_arr[0] = 4.599999904632568
+  on_install_tcp = True
+  on_follow_tcp = True
+  textmsg(on_devices_primary_log, ": HEX + RG2 + [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]")
+  on_tcp_active_is_primary = True
+  on_tcp_vision_primary = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  on_cog_vision_primary = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  on_mass_vision_primary = 0.0
+  on_tcp_qc_primary = p[0.0, 0.0, 0.050, 0.0, 0.0, 0.0]
+  on_cog_qc_primary = p[0.0, 0.005, 0.020, 0.0, 0.0, 0.0]
+  on_mass_qc_primary = 0.35
+  on_tcp_gripper_static_primary = rg_mount_tcp(rg_mounting_angle_arr[0])
+  on_cog_gripper_primary = rg_mount_cog(rg_mounting_angle_arr[0])
+  on_mass_gripper_primary = 0.78
+  on_tcp_tool_primary = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  on_cog_tool_primary = p[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  on_mass_tool_primary = 0.0
+  #======    OnRobot FT Bias    ======#
+
+  def ft_bias(zero=True):
+  if ON_DEBUG_LOG:
+  textmsg("FT Bias sending...")
+  end
+  on_wait_ms(100)
+  on_xmlrpc.ft_bias(zero)
+  on_wait_ms(100)
+  if ON_DEBUG_LOG:
+  textmsg("FT Bias sent.")
+  end
+  end
+
+  #======    End of OnRobot FT Bias    ======#
+  #======    OnRobot FT Sensor Config    ======#
+
+  ft_sensor_flange_offset=ON_ZEROFRAME
+  ft_sensor_TCP_offset=ON_ZEROFRAME
+  def ft_sensor_config_send(sensorFlangeOffset=ON_ZEROFRAME):
+  if ON_DEBUG_LOG:
+  textmsg("Sensor Config sending started!")
+  end
+  sensorOffset=[sensorFlangeOffset[0]*1000.0,sensorFlangeOffset[1]*1000.0,sensorFlangeOffset[2]*1000.0,sensorFlangeOffset[3],sensorFlangeOffset[4],sensorFlangeOffset[5]]
+  on_xmlrpc.ft_sensor_config(sensorOffset)
+  ft_sensor_flange_offset=sensorFlangeOffset
+  if ON_DEBUG_LOG:
+  textmsg("Sensor Config sent.")
+  end
+  end
+
+  #======    End of OnRobot FT Sensor Config    ======#
+
+  #======    End of OnRobot RG Depth    ======#
+  #======    OnRobot RG Width Messages    ======#
+
+  rg_grip_title="OnRobot - RG-Greifer"
+  rg_grip_return_error_n1="RG-Greiferbefehl hat einen Fehler zurückgegeben.<br>Sicherstellen, dass die erforderliche Breite zwischen den Grenzwerten liegt.<br>Programm angehalten."
+
+  #======    End of OnRobot RG Width Messages    ======#
+  #======    OnRobot RG Width    ======#
+
+  RG_MIN_WIDTH=0
+  RG_MAX_WIDTH_RG2=110
+  RG_MAX_WIDTH_RG6=160
+  RG_MIN_FORCE=0
+  RG_MAX_FORCE_RG2=40
+  RG_MAX_FORCE_RG6=120
+  rg__grip_param_warning_width="The parameter 'width' is out of the limits. Limited value sent: "
+  rg__grip_param_warning_force="The parameter 'force' is out of the limits. Limited value sent: "
+  def rg_depth_compensate(tool_index,start_depth_mm):
+  local timeout=0
+  while not rg_Busy_arr[tool_index]:
+  sleep(0.008)
+  timeout=timeout+1
+  if timeout>20:
+  break
+  end
+  end
+  local start_pose=get_forward_kin()
+  if(tool_index==ON_DI_SECONDARY):
+  local tcp_static=on_tcp_static_secondary
+  else:
+  local tcp_static=on_tcp_static_primary
+  end
+  local t_w_rg=pose_trans(get_actual_tool_flange_pose(),tcp_static)
+  local t_rg_w=pose_inv(t_w_rg)
+  local compensation_depth_mm=0
+  local after_ready_continue_count=10
+  while True:
+  local busy=rg_Busy_arr[tool_index]
+  if not busy:
+  if after_ready_continue_count>0:
+  after_ready_continue_count=after_ready_continue_count-1
+  else:
+  break
+  end
+  end
+  local measure_depth_mm=rg_Depth_arr[tool_index]
+  compensation_depth_mm=measure_depth_mm-start_depth_mm
+  local target_pose=pose_add(start_pose,pose_trans(pose_trans(t_w_rg,p[0,0,compensation_depth_mm/1000.0,0,0,0]),t_rg_w))
+  servoj(get_inverse_kin(target_pose),t=0.008,lookahead_time=0.033,gain=1500)
+  end
+  stopj(20)
+  end
+  def rg_grip(width,force,tool_index=0,blocking=True,depth_comp=False,popupmsg=True):
+  if ON_DEBUG_LOG:
+  textmsg("RG Grip start..")
+  end
+  local retVal=0
+  local limitOffset=(2.0*rg_fingertip_arr[tool_index])
+  local width2send=width
+  if limitOffset>0:
+  local minWidth=RG_MIN_WIDTH
+  else:
+  local minWidth=RG_MIN_WIDTH-limitOffset
+  end
+  if not(width2send>=minWidth):
+  width2send=minWidth
+  textmsg(rg__grip_param_warning_width,width2send)
+  elif not(force>=RG_MIN_FORCE):
+  force=RG_MIN_FORCE
+  textmsg(rg__grip_param_warning_force,force)
+  end
+  if(rg_Device_ID_arr[tool_index]==RG_DEVICE_ID_RG6):
+  if not(width2send<=RG_MAX_WIDTH_RG6-limitOffset):
+  width2send=RG_MAX_WIDTH_RG6-limitOffset
+  textmsg(rg__grip_param_warning_width,width2send)
+  elif not(force<=RG_MAX_FORCE_RG6):
+  force=RG_MAX_FORCE_RG6
+  textmsg(rg__grip_param_warning_force,force)
+  end
+  else:
+  if not(width2send<=RG_MAX_WIDTH_RG2-limitOffset):
+  width2send=RG_MAX_WIDTH_RG2-limitOffset
+  textmsg(rg__grip_param_warning_width,width2send)
+  elif not((force<=RG_MAX_FORCE_RG2)):
+  force=RG_MAX_FORCE_RG2
+  textmsg(rg__grip_param_warning_force,force)
+  end
+  end
+  rg_Grip_guard_arr[tool_index]=False
+  sync()
+  if(tool_index==ON_DI_SECONDARY):
+  local isPrimary=False
+  else:
+  local isPrimary=True
+  end
+  if(on_follow_tcp):
+  on_tcp_set_actual_to(isPrimary)
+  end
+  if depth_comp:
+  local start_depth_mm=rg_Depth_arr[tool_index]
+  end
+  sync()
+  retVal=on_xmlrpc.rg_grip(tool_index,width2send+0.0,force+0.0)
+  if(retVal!=0):
+  popup(rg_grip_return_error_n1,rg_grip_title,error=True,blocking=False)
+  halt
+  end
+  if depth_comp:
+  rg_depth_compensate(tool_index,start_depth_mm)
+  end
+  if blocking:
+  if not depth_comp:
+  local timeout=0
+  while not rg_Busy_arr[tool_index]:
+  sleep(0.008)
+  timeout=timeout+1
+  if timeout>20:
+  break
+  end
+  end
+  end
+  while(rg_Busy_arr[tool_index]==True):
+  sync()
+  end
+  end
+  if(on_follow_tcp):
+  on_tcp_update(isPrimary)
+  end
+  if ON_DEBUG_LOG:
+  textmsg("RG Grip ended.")
+  end
+  return retVal
+  end
+
+  #======    End of OnRobot RG Width    ======#
+  #======    OnRobot VG Monitor Messages    ======#
+
+  rg_monitor_error_title="OnRobot - RG-Greifer verloren"
+  rg_monitor_grip_lost_error="Griffverlust erkannt.<br>Programm angehalten."
+
+  #======    End of OnRobot VG Monitor Messages    ======#
+  #======    OnRobot RG Monitor    ======#
+
+  thread rg_monitor_thread():
+  while True:
+  sync()
+  local rg_error=False
+  if(rg_index==ON_DI_DUAL):
+  local tool_index=ON_DI_SECONDARY
+  rg_error=rg_monitor_check(tool_index)
+  local tool_index=ON_DI_PRIMARY
+  else:
+  local tool_index=rg_index
+  end
+  rg_error=rg_monitor_check(tool_index)
+  if rg_error:
+  halt
+  end
+  end
+  end
+  def rg_monitor_check(tool_index=0):
+  local error=False
+  if rg_Grip_guard_arr[tool_index]and not rg_Grip_detected_arr[tool_index]:
+  popup(rg_monitor_grip_lost_error,title=rg_monitor_error_title,error=True,blocking=False)
+  rg_payload_set(0,tool_index=tool_index)
+  error=True
+  end
+  return error
+  end
+
+  #======    End of OnRobot RG Monitor    ======#
+  #======    OnRobot Run    ======#
+
+  textmsg(on_xmlrpc_start_ip,on_device_ip)
+  on_portopen_javaSocket()
+  sync()
+  on_rtde_feed_open()
+  sync()
+  local gripperWDs=binary_list_to_integer(on_gripper)
+  if gripperWDs==0:
+  gripperWDs=-1
+  else:
+  gripperWDs=floor(gripperWDs/2)
+  end
+  on_set_rtde_watchdog(updateHz=0.2,ftWD=on_ft,gripperWD=gripperWDs)
+  sync()
+  on_dataRead_running=True
+  sync()
+  on_dataRead_thrd=run on_dataRead_thread()
+  sync()
+  on_tcp_init_primary()
+  on_payload_init_primary()
+
+  on_tcp_set_actual_to(on_tcp_active_is_primary)
+  if(on_follow_tcp):
+  on_payload_set_actual()
+  end
+
+  #======    End of OnRobot Run    ======#
+  #======    OnRobot CB Run    ======#
+
+  cb_sensor_cycle=4
+  cb_robot_max_trans_spd=1500.0
+  cb_robot_max_rot_spd=1.75
+  cb_robot_max_trans_acc=3000.0
+  cb_robot_max_rot_acc=0.2
+  on_xmlrpc.cb_robot_configuration(cb_robot_max_rot_spd,cb_robot_max_trans_spd,cb_sensor_cycle,cb_robot_cycle,cb_robot_max_trans_acc,cb_robot_max_rot_acc)
+
+  #======    End of OnRobot CB Run    ======#
+  #======    OnRobot FT Run    ======#
+
+  ft_sensor_filter=4
+  ft_cmd_thrd=run ft_commandFlow_RX_thread()
+  sync()
+
+  #======    End of OnRobot FT Run    ======#
+  #======    OnRobot HEX Run    ======#
+
+  on_xmlrpc.ft_sensor_filter(ft_sensor_filter)
+  ft_sensor_config_send(on_tcp_base_primary)
+  ft_dataRead_running=True
+  sync()
+  ft_dataRead_thrd=run hex_dataRead_thread()
+  sync()
+  textmsg(hex_sensor_id_waiting,on_device_ip)
+  local hex_timeout=0
+  while(ft_Sensor_ID==FT_SENSOR_ID_UNDEFINED):
+  sync()
+  hex_timeout=hex_timeout+1
+  if(hex_timeout>ON_INIT_TIMEOUT):
+  popup(hex_sensor_id_timeout,hex_sensor_error_title,error=True,blocking=False)
+  halt
+  end
+  end
+  ft_has_valid_ID=True
+  ft_dataProcess_running=True
+  sync()
+  ft_dataProcess_thrd=run ft_dataProcess_hex_thread()
+  sync()
+  hex_watchdog_start_thrd=run hex_start_watchdog_thread()
+  sync()
+  on_tcp_offset_send(get_tcp_offset())
+  ft_bias(True)
+
+  #======    End of OnRobot HEX Run    ======#
+  #======    OnRobot RG Run    ======#
+
+  rg_dataRead_running=True
+  sync()
+  rg_dataRead_thrd=run rg_dataRead_thread()
+  sync()
+  textmsg(rg_device_id_waiting)
+  if(rg_index==ON_DI_DUAL):
+  local rg_timeout=0
+  while not((rg_Device_ID_arr[ON_DI_PRIMARY]==RG_DEVICE_ID_RG2)or(rg_Device_ID_arr[ON_DI_PRIMARY]==RG_DEVICE_ID_RG6)):
+  sync()
+  rg_timeout=rg_timeout+1
+  if(rg_timeout>ON_INIT_TIMEOUT):
+  popup(rg_device_id_timeout,rg_error_title,error=True,blocking=False)
+  halt
+  end
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Primary RG: ",rg_Device_ID_arr[ON_DI_PRIMARY])
+  end
+  local rg_timeout=0
+  while not((rg_Device_ID_arr[ON_DI_SECONDARY]==RG_DEVICE_ID_RG2)or(rg_Device_ID_arr[ON_DI_SECONDARY]==RG_DEVICE_ID_RG6)):
+  sync()
+  if(rg_timeout>ON_INIT_TIMEOUT):
+  popup(rg_device_id_timeout,rg_error_title,error=True,blocking=False)
+  halt
+  end
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Secondary RG: ",rg_Device_ID_arr[ON_DI_SECONDARY])
+  end
+  else:
+  local rg_timeout=0
+  while not((rg_Device_ID_arr[rg_index]==RG_DEVICE_ID_RG2)or(rg_Device_ID_arr[rg_index]==RG_DEVICE_ID_RG6)):
+  sync()
+  if(rg_timeout>ON_INIT_TIMEOUT):
+  popup(rg_device_id_timeout,rg_error_title,error=True,blocking=False)
+  halt
+  end
+  end
+  if ON_DEBUG_LOG:
+  textmsg("Single RG: ",rg_Device_ID_arr[rg_index])
+  end
+  end
+  sync()
+  rg_dataProcess_running=True
+  sync()
+  rg_dataProcess_thrd=run rg_dataProcess_thread()
+  sync()
+  rg_watchdog_start_thrd=run rg_start_watchdog_thread()
+  sync()
+  rg_monitor_thread_handle=run rg_monitor_thread()
+  sync()
+
+  #======    End of OnRobot RG Run    ======#
+  #======    OnRobot FT Limit    ======#
+
+  def ft_limit_start(ft_select=ON_FALSE8D,ft_limits=ON_ZERO8D,ft_abs=ON_FALSE6D,v_min=0,frameID=0,frameRPY=ON_ZERO3D,popupmsg=True):
+  local frame_rotvec=rpy2rotvec(frameRPY)
+  local frame=[0.0,0.0,0.0,frame_rotvec[0],frame_rotvec[1],frame_rotvec[2]]
+  on_xmlrpc.ft_limit(ft_limits,ft_abs,ft_select,v_min*1000.0,frameID,frame)
+  end
+  def ft_limit_stop(forFTControl=False):
+  on_xmlrpc.ft_limit_stop()
+  end
+
+  #======    End of OnRobot FT Limit    ======#
+  #======    OnRobot FT FTControl Messages    ======#
+
+  ft_ftcontrol_title="OnRobot - F/T-Steuerung"
+  ft_ftcontrol_start_error="Fügen Sie keinen F/T-Steuerbefehl unter einen anderen F/T-Steuerbefehl ein."
+
+  #======    End of OnRobot FT FTControl Messages    ======#
+  #======    OnRobot FT FTControl    ======#
+
+  ft_ftcontrol_state=0
+  ft_ftcontrol_return=0
+  FT_FTCONTROL_STATE_IDLE=0
+  FT_FTCONTROL_STATE_RUNNING=1
+  def ft_ftcontrol_start(ft_select=ON_FALSE6D,ft_values=ON_ZERO6D,frameID=0,frameRPY=ON_ZERO3D,gainP=[1.0,1.0,1.0,1.0,1.0,1.0],gainI=ON_ZERO6D,gainD=ON_ZERO6D):
+  if not(ft_ftcontrol_state==FT_FTCONTROL_STATE_IDLE):
+  textmsg("ft_ftcontrol_state: ",ft_ftcontrol_state)
+  popup(ft_ftcontrol_start_error,title=ft_ftcontrol_title,error=True,blocking=False)
+  halt
+  else:
+  ft_ftcontrol_state=FT_FTCONTROL_STATE_RUNNING
+  end
+  on_tcp_offset_send(get_tcp_offset())
+  local frame_rotvec=rpy2rotvec(frameRPY)
+  local frame=[0.0,0.0,0.0,frame_rotvec[0],frame_rotvec[1],frame_rotvec[2]]
+  if ON_DEBUG_LOG:
+  textmsg("Start force mode")
+  end
+  on_speedl_start_for(ON_SPEEDL_FTCONTROL)
+  on_xmlrpc.ft_ftcontrol(ft_values,ft_select,frameID,frame,gainP,gainI,gainD)
+  if frameID==0 or frameID==1 or frameID==2 or frameID==3:
+  ft_parent_ft_move_frameID=frameID
+  ft_parent_ft_move_frame=p[0,0,0,frame_rotvec[0],frame_rotvec[1],frame_rotvec[2]]
+  else:
+  ft_parent_ft_move_frameID=0
+  ft_parent_ft_move_frame=ON_ZEROFRAME
+  end
+  if ON_DEBUG_LOG:
+  textmsg("FT Control started")
+  end
+  end
+  def ft_ftcontrol_stop():
+  on_speedl_stop_for(ON_SPEEDL_FTCONTROL)
+  on_xmlrpc.ft_ftcontrol_stop()
+  ft_ftcontrol_state=FT_FTCONTROL_STATE_IDLE
+  ft_parent_ft_move_frameID=0
+  ft_parent_ft_move_frame=ON_ZEROFRAME
+  end
+
+  #======    End of OnRobot FT FTControl    ======#
+  #======    OnRobot FT Hand Guide Messages    ======#
+
+  ft_hand_guide_title="OnRobot - Handführung"
+  ft_hand_guide_error_high_ft="Zu starke Kräfte. Handführung angehalten."
+  ft_hand_guide_error_singularity="Der Werkzeugflansch ist zu nahe an einer Singularität. Handführung angehalten."
+  ft_hand_guide_safemode_enter="Der Werkzeugflansch ist zu nahe an der Singularität der Basis-Z-Achse. Die Handführung ist im abgesicherten Modus."
+  ft_hand_guide_state_error="Binden Sie einen Handführungsbefehl nicht in einen anderen Handführungsbefehl oder F/T-Steuerungsbefehl ein."
+  ft_hand_guide_return_error="Der Befehl wurde mit einem Fehler zurückgegeben."
+  ft_hand_guide_safemode_exit="Abgesicherter Modus der Handführung beendet."
+
+  #======    End of OnRobot FT Hand Guide Messages    ======#
+  #======    OnRobot FT Hand Guide    ======#
+
+  ft_hg_enable_HandGuide=True
+  ft_hand_guide_state=0
+  ft_hg_enable_axes=ON_FALSE6D
+  ft_hg_axisZ_extra_dist=0
+  ft_hg_axisZ_min_dist=0
+  ft_hg_axisZ_dist=0
+  ft_hg_TMB_dist=0
+  ft_hg_joints_min_dev=0
+  ft_hg_stop_F=0
+  ft_hg_stop_T=0
+  ft_hg_joints_min_dev=d2r(0.5)
+  ft_hg_axisZ_extra_dist=0.06
+  if on_robot_type==10:
+  if ON_DEBUG_LOG:
+  textmsg("Robot type UR10 set")
+  end
+  ft_hg_axisZ_min_dist=0.163941
+  ft_hg_TMB_dist=0.0922
+  elif on_robot_type==5:
+  if ON_DEBUG_LOG:
+  textmsg("Robot type UR5 set")
+  end
+  ft_hg_axisZ_min_dist=0.10915
+  ft_hg_TMB_dist=0.0823
+  elif on_robot_type==3:
+  if ON_DEBUG_LOG:
+  textmsg("Robot type UR3 set")
+  end
+  ft_hg_axisZ_min_dist=0.11235
+  ft_hg_TMB_dist=0.0819
+  elif on_robot_type==0:
+  if ON_DEBUG_LOG:
+  textmsg("Robot type not set: do not use caranteen")
+  end
+  ft_hg_axisZ_min_dist=0
+  ft_hg_TMB_dist=0.0
+  else:
+  if ON_DEBUG_LOG:
+  textmsg("Unknown robot type, using UR10 parameters; Type: ",on_robot_type)
+  end
+  ft_hg_axisZ_min_dist=0.163941
+  ft_hg_TMB_dist=0.0922
+  end
+  ft_hg_axisZ_dist=ft_hg_axisZ_min_dist+ft_hg_axisZ_extra_dist
+  if on_hex:
+  ft_hg_sensor_filter=6
+  else:
+  ft_hg_sensor_filter=5
+  end
+  FT_HAND_GUIDE_STATE_IDLE=0
+  FT_HAND_GUIDE_STATE_RUNNING=1
+  def ft_hand_guide_start(axes_en=ON_FALSE6D,frameID=1,frame=ON_ZERO6D,thresholdF=15.0,thresholdT=0.6,saturationV=0.6,saturationW=0.2,stopF=100,stopT=5,gainP=[0.15,0.15,0.15,0.15,0.15,0.15],gainI=[0.0,0.0,0.0,0.0,0.0,0.0],gainD=[0.01,0.01,0.01,0.01,0.01,0.01]):
+  if ON_DEBUG_LOG:
+  textmsg("Starting hand guide")
+  end
+  local retVal=0
+  if not(ft_hand_guide_state==FT_HAND_GUIDE_STATE_IDLE or ft_hand_guide_state==FT_HAND_GUIDE_STATE_RUNNING):
+  textmsg("ft_hand_guide_state: ",ft_hand_guide_state)
+  popup(ft_hand_guide_state_error,title=ft_hand_guide_title,error=True,blocking=False)
+  halt
+  else:
+  ft_hand_guide_state=FT_HAND_GUIDE_STATE_RUNNING
+  end
+  local tcp_for_hand_guide=get_tcp_offset()
+  if on_hex:
+  tcp_for_hand_guide[0]=on_cog_actual[0]
+  tcp_for_hand_guide[1]=on_cog_actual[1]
+  tcp_for_hand_guide[2]=on_cog_actual[2]
+  end
+  on_tcp_offset_send(tcp_for_hand_guide)
+  retVal=on_xmlrpc.ft_sensor_filter(ft_hg_sensor_filter)
+  if retVal!=0:
+  popup(ft_hand_guide_return_error,title=ft_hand_guide_title,error=True,blocking=False)
+  end
+  ft_hg_stop_F=stopF
+  ft_hg_stop_T=stopT
+  frameID=1
+  frame=ON_ZERO6D
+  on_speedl_start_for(ON_SPEEDL_HANDGUIDE)
+  retVal=on_xmlrpc.ft_handguide(axes_en,thresholdF,thresholdT,saturationV*1000.0,saturationW,frameID,frame,gainP,gainI,gainD)
+  if retVal!=0:
+  popup(ft_hand_guide_return_error,title=ft_hand_guide_title,error=True,blocking=False)
+  end
+  if ON_DEBUG_LOG:
+  textmsg("HandGuide started")
+  end
+  end
+  def ft_hand_guide_stop():
+  on_speedl_stop_for(ON_SPEEDL_HANDGUIDE)
+  on_xmlrpc.ft_ftcontrol_stop()
+  ft_hand_guide_state=FT_HAND_GUIDE_STATE_IDLE
+  ft_parent_ft_move_frameID=0
+  ft_parent_ft_move_frame=ON_ZEROFRAME
+  on_xmlrpc.ft_sensor_filter(ft_sensor_filter)
+  end
+  def ft_hg_stop_limit_reached():
+  local is_reached=False
+
+  if(F3D>ft_hg_stop_F):
+  is_reached=True
+  elif(T3D>ft_hg_stop_T):
+  is_reached=True
+  end
+
+  return is_reached
+  end
+  def ft_hg_stop_area_reached():
+  local is_reached=False
+  local Zzero=p[0,0,0,0,0,0]
+  local XYplane=p[0,0,0,0,0,0]
+  local act_flange=get_actual_tool_flange_pose()
+  local act_joints=get_actual_joint_positions()
+  XYplane[0]=act_flange[0]
+  XYplane[1]=act_flange[1]
+  local qWrist2=act_joints[4]%ON_MATH_PI
+  local dist2Z=point_dist(XYplane,Zzero)
+  local dist2Z_min=ft_hg_axisZ_dist+(ft_hg_TMB_dist*cos(act_joints[4]))
+  if(dist2Z<dist2Z_min):
+  ft_speedl_hg_caranteen_reached=True
+  elif(dist2Z>dist2Z_min+0.01):
+  ft_speedl_hg_caranteen_reached=False
+  if ft_speedl_hg_caranteen_safemode:
+  ft_speedl_hg_caranteen_safemode=False
+  textmsg(ft_hand_guide_safemode_exit)
+  end
+  end
+  if(norm(qWrist2)<ft_hg_joints_min_dev):
+  is_reached=True
+  end
+  return is_reached
+  end
+  def ft_hand_guide_run():
+  while ft_hg_enable_HandGuide:
+  if(ft_hg_stop_limit_reached()):
+  popup(ft_hand_guide_error_high_ft,title=ft_hand_guide_title,error=True,blocking=False)
+  ft_hg_enable_HandGuide=False
+  elif(ft_hg_stop_area_reached()):
+  popup(ft_hand_guide_error_singularity,title=ft_hand_guide_title,warning=True,blocking=False)
+  ft_hg_enable_HandGuide=False
+  elif(ft_speedl_hg_caranteen_reached and(not ft_speedl_hg_caranteen_safemode)):
+  popup(ft_hand_guide_safemode_enter,title=ft_hand_guide_title,warning=True,blocking=True)
+  ft_speedl_hg_caranteen_safemode=True
+  else:
+  sync()
+  end
+  end
+  ft_hand_guide_stop()
+  end
+
+  #======    End of OnRobot FT Hand Guide    ======#
+  #======    OnRobot FT Move Messages    ======#
+
+  ft_move_error_title="OnRobot - F/T Bewegung-Fehler"
+  ft_search_error_title="OnRobot - Fehler bei F/T Suche"
+  ft_move_init_error="Falscher F/T-Bewegung- oder F/T-Suche-Status bei der Initialisierung.<br>Ein anderer Thread verwendet einen F/T-Bewegungs- oder F/T-Suchbefehl.<br>Programm angehalten."
+  ft_move_start_error="Falscher F/T-Bewegung- oder F/T-Suche-Status beim Start.<br>Ein anderer Thread verwendet einen F/T-Bewegungs- oder F/T-Suchbefehl.<br>Programm angehalten."
+  ft_move_return_error="Falscher F/T-Bewegungs- oder F/T-Suche-Status bei der Rückgabe.<br>Ein anderer Thread verwendet einen F/T-Bewegungs- oder F/T-Suchbefehl.<br>Programm angehalten."
+  ft_move_parameter_error_count="Parameterfehler.<br>Falsche Verwendung von F/T-Wegpunkt oder F/T-Pfad im Befehl F/T-Bewegung oder F/T-Suche.<br>Programm angehalten."
+  ft_move_return_stop="<br>Programm angehalten."
+  ft_move_move_return_title="OnRobot – F/T-Bewegung"
+  ft_move_move_return_0="Die Bewegung wurde beendet, ohne dass eine Kraft oder ein Drehmoment größer als der eingestellte Grenzwert erkannt wurde."
+  ft_move_move_return_1="Die Bewegung wurde beendet, weil eine Kraft oder ein Drehmoment erkannt wurde, die/das größer als der eingestellte Grenzwert ist."
+  ft_move_move_return_3="Die Bewegung wurde durch einen Befehl unterbrochen."
+  ft_move_move_return_11="Die Bewegung kann nicht gestartet werden, weil auf der Compute Box kein Pfad mit der ausgewählten ID verzeichnet ist.<br>Programm angehalten."
+  ft_move_move_return_12="Die Bewegung kann nicht starten, weil es auf diesem Pfad keine aufgezeichneten Punkte gibt.<br>Programm angehalten."
+  ft_move_move_return_13="Die Bewegung kann nicht gestartet werden, weil die unter dieser Pfad-ID gefundene Pfaddatei leer ist.<br>Programm angehalten."
+  ft_move_move_return_14="Die Bewegung kann nicht starten, weil die Pfaddatei beschädigt ist.<br>Programm angehalten."
+  ft_move_move_return_unknown="F/T-Bewegung mit unbekanntem Rückgabewert beendet.<br>Programm angehalten."
+  ft_move_search_return_title="OnRobot - F/T-Suche"
+  ft_move_search_return_0="Die Suche wurde erfolgreich beendet, weil eine Kraft oder ein Drehmoment größer als der eingestellte Grenzwert erkannt wurde."
+  ft_move_search_return_1="Die Suche wurde beendet, ohne dass eine Kraft oder ein Drehmoment größer als der eingestellte Grenzwert erkannt wurde."
+  ft_move_search_return_3="Die Suche wurde durch einen Befehl unterbrochen."
+  ft_move_search_return_11="Die Suche kann nicht gestartet werden, weil es auf der Compute Box keinen aufgezeichneten Pfad mit der ausgewählten ID gibt.<br>Programm angehalten."
+  ft_move_search_return_12="Die Suche kann nicht gestartet werden, weil es auf diesem Pfad keine aufgezeichneten Punkte gibt.<br>Programm angehalten."
+  ft_move_search_return_13="Die Suche kann nicht gestartet werden, weil die bei dieser Pfad-ID gefundene Pfaddatei leer ist.<br>Programm angehalten."
+  ft_move_search_return_14="Die Suche kann nicht gestartet werden, weil die Pfaddatei beschädigt ist.<br>Programm angehalten."
+  ft_move_search_return_unknown="F/T-Suche mit unbekanntem Rückgabewert beendet.<br>Programm angehalten."
+
+  #======    End of OnRobot FT Move Messages    ======#
+  #======    OnRobot FT Move    ======#
+
+  ft_move_state=0
+  ft_move_return=0
+  ft_move_frameID=0
+  ft_move_frame=ON_ZEROFRAME
+  ft_move_last_pose=ON_ZEROPOSE
+  ft_move_min_dist=0
+  ft_move_wp_count=0
+  ft_move_path_count=0
+  ft_move_path_move_home=False
+  ft_move_path_return=0
+  ft_move_min_dist=0.001
+  FT_MOVE_STATE_IDLE=0
+  FT_MOVE_STATE_INIT=1
+  FT_MOVE_STATE_GLOBALS_SET=2
+  FT_MOVE_STATE_PARAM_SEND=3
+  FT_MOVE_STATE_PARAM_SENT=4
+  FT_MOVE_STATE_INITED=5
+  FT_MOVE_STATE_STARTING=6
+  FT_MOVE_STATE_WP_SENT=7
+  FT_MOVE_STATE_STARTED=8
+  FT_MOVE_STATE_RETURNING=9
+  FT_MOVE_STATE_FINISHED=10
+  FT_MOVE_STATE_STOPPING=11
+  FT_MOVE_STATE_PATH_STOPPED=12
+  ft__move_parameter_error_coordsys="Parameter error.<br>Unknown coordinate system. Program stopped."
+  ft__move_parameter_error_speed="Parameter error.<br>Invalid value for the speed parameter. Program stopped."
+  ft__move_parameter_error_acc="Parameter error.<br>Invalid value for the acc parameter. Program stopped."
+  def ft_move_init(frameID=0,frameRPY=ON_ZERO3D,speed=0.05,acc=1.2,scale=False,move2First=True,move2Last=True):
+  sync()
+  if not(ft_move_state==FT_MOVE_STATE_IDLE):
+  textmsg("ft_move_state: ",ft_move_state)
+  popup(ft_move_init_error,title=ft_move_error_title,error=True,blocking=False)
+  halt
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_INIT
+  exit_critical
+  if ON_DEBUG_LOG:
+  textmsg("FT Move initializing..")
+  end
+  if not(speed>0):
+  popup(ft__move_parameter_error_speed,title=ft_move_error_title,error=True,blocking=False)
+  halt
+  elif not(acc>0):
+  popup(ft__move_parameter_error_acc,title=ft_move_error_title,error=True,blocking=False)
+  halt
+  else:
+  sync()
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_GLOBALS_SET
+  exit_critical
+  on_tcp_offset_send(get_tcp_offset())
+  ft_move_frameID=frameID
+  if frameID==0 or frameID==1:
+  ft_move_frame=ON_ZEROFRAME
+  elif frameID==2 or frameID==3:
+  frame_rotvec=rpy2rotvec(frameRPY)
+  ft_move_frame=p[0.0,0.0,0.0,frame_rotvec[0],frame_rotvec[1],frame_rotvec[2]]
+  else:
+  popup(ft__move_parameter_error_coordsys,title=ft_move_error_title,error=True,blocking=False)
+  halt
+  end
+  ft_move_path_move_home=False
+  ft_move_path_count=0
+  ft_move_wp_count=0
+  ft_move_last_pose=get_actual_tcp_pose()
+  local frameRV=rpy2rotvec(frameRPY)
+  local frame=[0.0,0.0,0.0,frameRV[0],frameRV[1],frameRV[2]]
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_PARAM_SEND
+  exit_critical
+  global move_ret=on_xmlrpc.cb_move_init(speed*1000.0,acc*1000.0,ft_move_frameID,frame)
+  if(move_ret!=0):
+  textmsg("Move INIT returned with error code: ",move_ret)
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_PARAM_SENT
+  exit_critical
+  if ON_DEBUG_LOG:
+  textmsg("FT Move initialized")
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_INITED
+  exit_critical
+  sync()
+  end
+  def ft_move_start_atomic():
+  if ON_DEBUG_LOG:
+  textmsg("Start Atomic (Move) sending..")
+  end
+  on_speedl_start_for(ON_SPEEDL_MOVE)
+  local move_ret=on_xmlrpc.cb_move()
+  if ON_DEBUG_LOG:
+  textmsg("Start Atomic (Move) sent")
+  end
+  return move_ret
+  end
+  def ft_move_start_move(popupmsg=True):
+  sync()
+  if(ft_move_state==FT_MOVE_STATE_PATH_STOPPED):
+  local move_return=ft_move_path_return
+  elif not(ft_move_state==FT_MOVE_STATE_INITED):
+  textmsg("ft_move_state: ",ft_move_state)
+  popup(ft_move_start_error,title=ft_move_error_title,error=True,blocking=False)
+  halt
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_STARTING
+  exit_critical
+  if not(ft_move_wp_count>0 or ft_move_path_count==1):
+  textmsg("[Waypoint#, Path#]: ",[ft_move_wp_count,ft_move_path_count])
+  popup(ft_move_parameter_error_count,title=ft_move_error_title,error=True,blocking=False)
+  halt
+  else:
+  sync()
+  end
+  if ON_DEBUG_LOG:
+  textmsg("FT Move started")
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_STARTED
+  exit_critical
+  local move_return=ft_move_start_atomic()
+  on_speedl_stop_for(ON_SPEEDL_MOVE)
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_FINISHED
+  exit_critical
+  if move_return==9:
+  ft_move_return=0
+  elif move_return==12:
+  ft_move_return=1
+  if popupmsg:
+  popup(str_cat(ft_move_move_return_1,ft_move_return_stop),title=ft_move_move_return_title,warning=True,blocking=False)
+  halt
+  end
+  elif move_return==4:
+  ft_move_return=3
+  if popupmsg:
+  popup(str_cat(ft_move_move_return_3,ft_move_return_stop),title=ft_move_move_return_title,warning=True,blocking=False)
+  halt
+  end
+  elif move_return==3:
+  ft_move_return=3
+  popup(str_cat(ft_move_move_return_3,ft_move_return_stop),title=ft_move_move_return_title,warning=True,blocking=False)
+  halt
+  elif move_return==8:
+  ft_move_return=8
+  popup(ft_move_move_return_unknown,title=ft_move_move_return_title,warning=True,blocking=False)
+  halt
+  elif move_return==-11:
+  ft_move_return=11
+  popup(ft_move_move_return_11,title=ft_move_move_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-12:
+  ft_move_return=12
+  popup(ft_move_move_return_12,title=ft_move_move_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-13:
+  ft_move_return=13
+  popup(ft_move_move_return_13,title=ft_move_move_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-14:
+  ft_move_return=14
+  popup(ft_move_move_return_14,title=ft_move_move_return_title,error=True,blocking=False)
+  halt
+  else:
+  ft_move_return=move_return
+  popup(ft_move_move_return_unknown,title=ft_move_move_return_title,error=True,blocking=False)
+  halt
+  end
+  if ON_DEBUG_LOG:
+  textmsg("FT Move finished with return value: ",ft_move_return)
+  end
+  if(ft_move_path_move_home):
+  if(ft_move_return==0):
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_INITED
+  ft_move_path_return=move_return
+  exit_critical
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_PATH_STOPPED
+  ft_move_path_return=move_return
+  exit_critical
+  end
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_IDLE
+  exit_critical
+  end
+  sync()
+  return ft_move_return
+  end
+  def ft_move_start_search(popupmsg=True):
+  sync()
+  if(ft_move_state==FT_MOVE_STATE_PATH_STOPPED):
+  local move_return=ft_move_path_return
+  elif not(ft_move_state==FT_MOVE_STATE_INITED):
+  textmsg("ft_move_state: ",ft_move_state)
+  popup(ft_move_start_error,title=ft_search_error_title,error=True,blocking=False)
+  halt
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_STARTING
+  exit_critical
+  if not(ft_move_wp_count>0 or ft_move_path_count==1):
+  textmsg("[Waypoint#, Path#]: ",[ft_move_wp_count,ft_move_path_count])
+  popup(ft_move_parameter_error_count,title=ft_search_error_title,error=True,blocking=False)
+  halt
+  else:
+  sync()
+  end
+  if ON_DEBUG_LOG:
+  textmsg("FT Move started")
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_STARTED
+  exit_critical
+  local move_return=ft_move_start_atomic()
+  on_speedl_stop_for(ON_SPEEDL_MOVE)
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_FINISHED
+  exit_critical
+  if move_return==12:
+  ft_search_return=0
+  elif move_return==9:
+  ft_search_return=1
+  if popupmsg:
+  popup(str_cat(ft_move_search_return_1,ft_move_return_stop),title=ft_move_search_return_title,warning=True,blocking=False)
+  halt
+  end
+  elif move_return==4:
+  ft_search_return=3
+  if popupmsg:
+  popup(str_cat(ft_move_search_return_3,ft_move_return_stop),title=ft_move_search_return_title,warning=True,blocking=False)
+  halt
+  end
+  elif move_return==3:
+  ft_search_return=3
+  popup(str_cat(ft_move_search_return_3,ft_move_return_stop),title=ft_move_search_return_title,warning=True,blocking=False)
+  halt
+  elif move_return==8:
+  ft_search_return=8
+  popup(ft_move_search_return_unknown,title=ft_move_search_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-11:
+  ft_search_return=11
+  popup(ft_move_search_return_11,title=ft_move_search_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-12:
+  ft_search_return=12
+  popup(ft_move_search_return_12,title=ft_move_search_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-13:
+  ft_search_return=13
+  popup(ft_move_search_return_13,title=ft_move_search_return_title,error=True,blocking=False)
+  halt
+  elif move_return==-14:
+  ft_search_return=14
+  popup(ft_move_search_return_14,title=ft_move_search_return_title,error=True,blocking=False)
+  halt
+  else:
+  ft_search_return=move_return
+  popup(ft_move_search_return_unknown,title=ft_move_search_return_title,error=True,blocking=False)
+  halt
+  end
+  if ON_DEBUG_LOG:
+  textmsg("FT Search finished with return value: ",ft_search_return)
+  end
+  if(ft_move_path_move_home):
+  if(ft_search_return==0):
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_INITED
+  exit_critical
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_PATH_STOPPED
+  exit_critical
+  end
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_IDLE
+  exit_critical
+  end
+  sync()
+  return ft_search_return
+  end
+  def ft_move_limit_return(limit_return):
+  if limit_return==0:
+  ft_move_return=0
+  elif limit_return==1:
+  ft_move_return=1
+  else:
+  ft_move_return=2
+  if ON_DEBUG_LOG:
+  textmsg("FT Move returned with limit_return: ",limit_return)
+  end
+  end
+  end
+  def ft_move_stop():
+  if ft_move_state==FT_MOVE_STATE_IDLE:
+  textmsg("No move command has been stopped")
+  else:
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_STOPPING
+  exit_critical
+  on_speedl_stop_for(ON_SPEEDL_MOVE)
+  on_xmlrpc.cb_move_stop()
+  ft_move_return=3
+  end
+  enter_critical
+  ft_move_state=FT_MOVE_STATE_IDLE
+  exit_critical
+  end
+
+  #======    End of OnRobot FT Move    ======#
+  #======    OnRobot FT Waypoint Messages    ======#
+
+  ft_waypoint_error_title="OnRobot - F/T Wegpunktfehler"
+  ft_waypoint_move_state_error="Falsche Programmstruktur bei der Initialisierung von F/T-Wegpunkt.<br>Programm angehalten.<br>Vergewissern Sie sich, dass sich der F/T-Wegpunkt unter F/T-Bewegung oder F/T-Suche befindet."
+  ft_waypoint_path_count_error="Falsche Verwendung des F/T-Wegpunktes.<br>Verwenden Sie F/T-Wegpunkt und F/T-Pfad nicht in der gleichen F/T-Bewegung oder F/T-Suche.<br>Programm angehalten."
+  ft_waypoint_parameter_error_target="Parameterfehler.<br>Bitte definieren Sie einen gültigen festen, variablen oder relativen F/T-Wegpunkt."
+  ft_waypoint_parameter_error_close="Parameterfehler.<br>Die angegebene Position liegt zu nahe an der letzten. Programm angehalten."
+  ft_waypoint_parameter_error_distance="Abstand zur letzten Pose:"
+
+  #======    End of OnRobot FT Waypoint Messages    ======#
+  #======    OnRobot FT Move    ======#
+
+  def ft_waypoint_send(wp):
+  if not(wp==ON_ZEROPOSE):
+  relativeWPInt=0
+  local wp_array=[wp[0]*1000.0,wp[1]*1000.0,wp[2]*1000.0,wp[3],wp[4],wp[5]]
+  on_xmlrpc.cb_move_waypoint(wp_array)
+  if ON_DEBUG_LOG:
+  textmsg("FT Waypoint sent: ",wp)
+  end
+  ft_move_wp_count=ft_move_wp_count+1
+  else:
+  textmsg("Invalid FT Waypoint and not sent")
+  end
+  end
+  def ft_waypoint(fixP=ON_ZEROPOSE,variableP=p[0,0,0,0,0,0],relativeP=p[0,0,0,0,0,0]):
+  sync()
+  local mergedWP=ON_ZEROPOSE
+  local startPose=ON_ZEROPOSE
+  local frameID=ft_move_frameID
+  if not(ft_move_state==FT_MOVE_STATE_INITED):
+  textmsg("ft_move_state: ",ft_move_state)
+  popup(ft_waypoint_move_state_error,title=ft_waypoint_error_title,error=True,blocking=False)
+  halt
+  end
+  if ft_move_path_count!=0:
+  popup(ft_waypoint_path_count_error,title=ft_waypoint_error_title,error=True,blocking=False)
+  halt
+  end
+  if fixP==ON_ZEROPOSE:
+  if variableP==ON_ZEROPOSE:
+  if(relativeP==ON_ZEROPOSE):
+  popup(ft_waypoint_parameter_error_target,title=ft_waypoint_error_title,error=True,blocking=False)
+  halt
+  end
+  if frameID==0:
+  startPose=ft_move_last_pose
+  elif frameID==1:
+  startPose=ON_ZEROPOSE
+  elif frameID==2:
+  startPose=pose_trans(pose_inv(ft_move_frame),ft_move_last_pose)
+  elif frameID==3:
+  startPose=pose_inv(ft_move_frame)
+  else:
+  startPose=ft_move_last_pose
+  end
+  else:
+  startPose=variableP
+  end
+  mergedCustom=pose_add(relativeP,startPose)
+  if frameID==0:
+  mergedWP=mergedCustom
+  elif frameID==1:
+  mergedWP= pose_trans(ft_move_last_pose,mergedCustom)
+  elif frameID==2:
+  mergedWP=pose_trans(ft_move_frame,mergedCustom)
+  elif frameID==3:
+  local customMerged=pose_trans(ft_move_frame,mergedCustom)
+  mergedWP=pose_trans(ft_move_last_pose,customMerged)
+  end
+  else:
+  mergedWP=fixP
+  end
+  local poseDiff=point_dist(mergedWP,ft_move_last_pose)
+  if((ft_move_wp_count!=0)and(poseDiff<ft_move_min_dist)):
+  textmsg(ft_waypoint_parameter_error_distance,poseDiff)
+  popup(ft_waypoint_parameter_error_close,title=ft_waypoint_error_title,error=True,blocking=False)
+  halt
+  else:
+  ft_waypoint_send(mergedWP)
+  end
+  ft_move_last_pose=mergedWP
+  return mergedWP
+  end
+
+  #======    End of OnRobot FT Move    ======#
+  #======    OnRobot FT Path Messages    ======#
+
+  ft_path_title="OnRobot - F/T-Pfad"
+  ft_path_error_title="OnRobot - F/T Pfadfehler"
+  ft_path_move_state_error="Falsche Programmstruktur bei der Initialisierung von F/T-Pfad.<br>Programm angehalten.<br>Vergewissern Sie sich, dass sich der F/T-Pfad in einer richtigen Struktur unter F/T-Bewegung oder F/T-Suche befindet."
+  ft_path_path_count_error="Falsche Verwendung des F/T-Pfades.<br>Verwenden Sie nicht mehrere F/T-Pfade in derselben F/T-Bewegung oder F/T-Suche.<br>Programm angehalten."
+  ft_path_wp_count_error="Falsche Verwendung des F/T-Pfades.<br>Verwenden Sie F/T-Wegpunkt und F/T-Pfad nicht in der gleichen F/T-Bewegung oder F/T-Suche.<br>Programm angehalten."
+  ft_path_parameter_error_pathid="Parameterfehler.<br>Ungültige F/T-Pfad-ID."
+  ft_path_speedscale_warning="Der F/T-Pfadbefehl wird nur dann richtig wiedergegeben, wenn die Geschwindigkeitsskala auf 100 % eingestellt ist. <br>Drücken Sie die Schaltfläche 'Continue', um mit der Wiedergabe mit 100 % Geschwindigkeit fortzufahren."
+
+  #======    End of OnRobot FT Path Messages    ======#
+  #======    OnRobot FT Path    ======#
+
+  def ft_path(pathID):
+  sync()
+  if not(ft_move_state==FT_MOVE_STATE_INITED or ft_move_state==FT_MOVE_STATE_PATH_STOPPED):
+  textmsg("ft_move_state: ",ft_move_state)
+  popup(ft_path_move_state_error,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  if not(ft_move_path_count==0):
+  popup(ft_path_path_count_error,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  if not((ft_move_wp_count==0 and not ft_move_path_move_home)or(ft_move_wp_count==1 or ft_move_path_move_home)):
+  textmsg("Path home & Waypoint#: ",[binary_list_to_integer([ft_move_path_move_home]),ft_move_wp_count])
+  popup(ft_path_wp_count_error,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  if not(pathID>0 or pathID==-1):
+  popup(ft_path_parameter_error_pathid,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  ft_move_path_move_home=False
+  on_xmlrpc.cb_move_path(pathID)
+  ft_move_path_count=ft_move_path_count+1
+  if ON_DEBUG_LOG:
+  textmsg("FT Path sent: ",pathID)
+  end
+  end
+  def ft_path_play(pathID=0,relative=False,homePose=ON_ZEROPOSE):
+  if not(ft_move_state==FT_MOVE_STATE_INITED):
+  textmsg("ft_move_state: ",ft_move_state)
+  popup(ft_path_move_state_error,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  if not(ft_move_path_count==0):
+  popup(ft_path_path_count_error,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  if not(ft_move_wp_count==0):
+  textmsg("Path home & Waypoint#: ",[binary_list_to_integer([ft_move_path_move_home]),ft_move_wp_count])
+  popup(ft_path_wp_count_error,title=ft_path_error_title,error=True,blocking=False)
+  halt
+  end
+  ft_move_path_return=0
+  if relative:
+  ft_move_path_move_home=False
+  else:
+  ft_move_path_move_home=True
+  end
+  if not relative:
+  ft_waypoint(fixP=homePose)
+  ft_move_start_move(popupmsg=False)
+  end
+  ft_path(pathID)
+  end
+
+  #======    End of OnRobot FT Path    ======#
+  #======    OnRobot FT Guard Messages    ======#
+
+  ft_guard_title="OnRobot - F/T-Schutz"
+  ft_guard_reached="Der eingestellte Grenzwert für F/T-Schutz wurde erreicht. Programm angehalten."
+
+  #======    End of OnRobot FT Guard Messages    ======#
+  #======    OnRobot FT Guard    ======#
+
+  ft_peakFzScanner_flag=False
+  ft_abs_Fz=0
+  ft_abs0_Fz=False
+  def ft_threshold_check(limitFT=ON_ZERO6D,selectLimit=ON_FALSE6D,absolute=True,frameID=1):
+  local is_above_the_threshold=False
+  local actualFT=ON_ZERO6D
+  local i=0
+  enter_critical
+  while(i<6):
+  if selectLimit[i]:
+
+  if(frameID==1):
+  actualFT[i]=FT_Tool[i]
+  else:
+  actualFT[i]=FT_Base[i]
+  end
+
+  if(absolute):
+  limitFT[i]=norm(limitFT[i])
+  actualFT[i]=norm(actualFT[i])
+  elif(0>limitFT[i]):
+  limitFT[i]=-limitFT[i]
+  actualFT[i]=-actualFT[i]
+  end
+  if(limitFT[i]<actualFT[i]):
+  is_above_the_threshold=True
+  end
+  end
+  i=i+1
+  end
+  exit_critical
+  return is_above_the_threshold
+  end
+  def ft_guard_check(limitFT=ON_ZERO6D,limitF3D=0,limitT3D=0,absolute=False,frameID=1):
+  local is_above_the_threshold=False
+  local selectLimit=ON_FALSE6D
+  local i=0
+  while(i<6):
+  if(limitFT[i]!=0.0):
+  selectLimit[i]=True
+  end
+  i=i+1
+  end
+  is_above_the_threshold=ft_threshold_check(limitFT,selectLimit,absolute,frameID)
+  enter_critical
+  if(limitF3D!=0):
+  local actualF3D=F3D
+  if(limitF3D<actualF3D):
+  is_above_the_threshold=True
+  end
+  end
+  if(limitT3D!=0):
+  local actualT3D=T3D
+  if(limitT3D<actualT3D):
+  is_above_the_threshold=True
+  end
+  end
+  exit_critical
+  return is_above_the_threshold
+  end
+
+  #======    End of OnRobot FT Guard    ======#
+  #======    OnRobot FT Insert Part Messages    ======#
+
+  ft_insert_part_error_title="OnRobot - Teil-einsetzen-Fehler"
+  ft_insert_part_state_error_start="Falscher F/T-Teil-einsetzen-Status bei der Initialisierung.<br>Ein anderer Thread verwendet einen F/T-Teil-einsetzen-Befehl. Programm angehalten."
+  ft_insert_part_state_error_return="Falscher F/T-Teil-einsetzen-Status bei der Rückgabe.<br>Ein anderer Thread verwendet einen F/T-Teil-einsetzen-Befehl. Programm angehalten."
+  ft_insert_part_return_title="OnRobot - Teil einsetzen"
+  ft_insert_part_return_0="Das Einsetzen hat die maximale Einsetztiefe erreicht."
+  ft_insert_part_return_1="Das Einsetzen kam nach der minimalen Einsetztiefe an den Anschlag."
+  ft_insert_part_return_2="Das Einsetzen hat sich nach der minimalen Einsetztiefe verlangsamt."
+  ft_insert_part_return_3="Das Einsetzen blieb vor der minimalen Einsetztiefe hängen."
+  ft_insert_part_return_4="Timeout des Befehls nach der minimalen Einsetztiefe."
+  ft_insert_part_return_5="Timeout des Befehls vor der minimalen Einsetztiefe."
+  ft_insert_part_return_6="Der Seitenkraft-/Drehmomentgrenzwert wurde nach der minimalen Einsetztiefe erreicht."
+  ft_insert_part_return_7="Der Seitenkraft-/Drehmomentgrenzwert wurde vor der minimalen Einsetztiefe erreicht."
+  ft_insert_part_return_8="Parameterfehler wurde von der Compute Box zurückgegeben.<br>Überprüfen Sie die Parameter für den Befehl F/T-Teil-einsetzen."
+  ft_insert_part_return_unknown="F/T-Teil-einsetzen mit unbekanntem Rückgabewert beendet."
+
+  #======    End of OnRobot FT Insert Part Messages    ======#
+  #======    OnRobot FT Insert Part    ======#
+
+  ft_insert_part_state=0
+  ft_insert_part_return=0
+  ft_sensor_filter_insertpart_hex=6
+  ft_insert_part_frameID=1
+  ft_insert_part_frameID_default=1
+  ft_insert_part_frameRPY=ON_ZERO3D
+  ft_insert_part_frameRPY_default=ON_ZERO3D
+  ft_insert_part_retAccept=[True,True,True,False,False,False,False,False,False]
+  ft_insert_part_retAccept_default=[True,True,True,False,False,False,False,False,False]
+  FT_INSERT_PART_STATE_IDLE=0
+  FT_INSERT_PART_STATE_INIT=1
+  FT_INSERT_PART_STATE_STARTED=2
+  FT_INSERT_PART_STATE_RETURNING=3
+  ft__insert_part_param_error_minDistZ="Please define parameter 'minDistZ' as a positive real number in meters!"
+  ft__insert_part_param_error_forceZ="Please define parameter 'forceZ' as a positive number in Newtons!"
+  ft__insert_part_param_error_maxDistZ="Please define parameter 'maxDistZ' as a positive real number in meters!"
+  ft__insert_part_param_error_maxDistZ_minDistZ="Please define the parameters as 'maxDistZ' >= 'minDistZ'!"
+  ft__insert_part_param_error_expSpeed="Please define parameter 'expSpeed' as a positive real number in meters!"
+  ft__insert_part_param_error_deltaForce="Please define parameter 'deltaForce' as a positive number in Newtons!"
+  ft__insert_part_param_error_timeOut="Please define parameter 'timeOut' as a positive number in seconds!"
+  ft__insert_part_param_error_FTLimits="Please define parameter 'FTLimits' as a 6-element array of positive numbers in Newtons & Newton-meters!"
+  ft__insert_part_param_error_PGainFxy="Please define parameter 'PGainFxy' as a positive real number!"
+  ft__insert_part_param_error_PGainFz="Please define parameter 'PGainFz' as a positive real number!"
+  ft__insert_part_param_error_PGainTxy="Please define parameter 'PGainTxy' as a positive real number!"
+  ft__insert_part_param_error_PGainTz="Please define parameter 'PGainTz' as a positive real number!"
+  def ft_insert_part(forceZ,minDistZ,maxDistZ=0.0,deltaForce=0.0,expSpeed=0.0,timeOut=0,compliance=[True,True,True,True,True,True],FTLimits=ON_ZERO6D,PGainFxy=1.0,PGainFz=1.0,PGainTxy=0.2,PGainTz=0.2,popupmsg=True):
+  sync()
+  if ON_DEBUG_LOG:
+  textmsg("Insert Part starting..")
+  end
+  if not(ft_insert_part_state==FT_INSERT_PART_STATE_IDLE):
+  textmsg("ft_insert_part_state: ",ft_insert_part_state)
+  popup(ft_insert_part_state_error_start,title=ft_insert_part_error_title,error=True,blocking=False)
+  halt
+  else:
+  enter_critical
+  ft_insert_part_state=FT_INSERT_PART_STATE_INIT
+  exit_critical
+  end
+  ft_insert_part_return=0
+  if not(minDistZ>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_minDistZ,title=ft_insert_part_error_title,error=True,blocking=True)
+  elif not(forceZ!=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_forceZ,title=ft_insert_part_error_title,error=True,blocking=True)
+  elif not(maxDistZ>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_maxDistZ,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(maxDistZ>=minDistZ or maxDistZ==0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_maxDistZ_minDistZ,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(expSpeed>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_expSpeed,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(deltaForce>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_deltaForce,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(timeOut>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_timeOut,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(FTLimits[0]>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_FTLimits,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(FTLimits[1]>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_FTLimits,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(FTLimits[3]>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_FTLimits,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(FTLimits[4]>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_FTLimits,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(FTLimits[5]>=0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_FTLimits,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(PGainFxy>0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_PGainFxy,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(PGainFz>0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_PGainFz,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(PGainTxy>0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_PGainTxy,title=ft_insert_part_error_title,error=True,blocking=False)
+  elif not(PGainTz>0):
+  ft_insert_part_return=8
+  popup(ft__insert_part_param_error_PGainTz,title=ft_insert_part_error_title,error=True,blocking=False)
+  end
+  if(ft_insert_part_return!=0):
+  halt
+  end
+  on_tcp_offset_send(get_tcp_offset())
+  local retAccept=ft_insert_part_retAccept
+  ft_insert_part_retAccept=ft_insert_part_retAccept_default
+  local ft_compliance=compliance
+  ft_compliance[2]=True
+  local ft_threshold=[FTLimits[0],FTLimits[1],(forceZ+deltaForce),FTLimits[3],FTLimits[4],FTLimits[5]]
+  i=0
+  while i<6:
+  if ft_compliance[i]:
+  ft_threshold[i]=0
+  end
+  i=i+1
+  end
+  local flags=binary_list_to_integer(ft_compliance)+(ft_insert_part_frameID*64)
+  ft_insert_part_frameID=ft_insert_part_frameID_default
+  local ft_insert_part_frame=rpy2rotvec(ft_insert_part_frameRPY)
+  ft_insert_part_frameRPY=ft_insert_part_frameRPY_default
+  sync()
+  ft_insert_part_return=ft_pin_insertion(minDistZ,forceZ,compliance,maxDistZ,expSpeed,deltaForce,timeOut,FTLimits,PGainFxy,PGainFz,PGainTxy,PGainTz)
+  if ON_DEBUG_LOG:
+  textmsg("Insert Part returned.")
+  end
+  if ft_insert_part_return==0:
+  if(popupmsg and(not retAccept[0])):
+  popup(ft_insert_part_return_0,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==1:
+  if(popupmsg and(not retAccept[1])):
+  popup(ft_insert_part_return_1,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==2:
+  if(popupmsg and(not retAccept[2])):
+  popup(ft_insert_part_return_2,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==3:
+  if(popupmsg and(not retAccept[3])):
+  popup(ft_insert_part_return_3,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==4:
+  if(popupmsg and(not retAccept[4])):
+  popup(ft_insert_part_return_4,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==5:
+  if(popupmsg and(not retAccept[5])):
+  popup(ft_insert_part_return_5,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==6:
+  if(popupmsg and(not retAccept[6])):
+  popup(ft_insert_part_return_6,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  elif ft_insert_part_return==7:
+  if(popupmsg and(not retAccept[7])):
+  popup(ft_insert_part_return_7,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  else:
+  popup(ft_insert_part_return_unknown,title=ft_insert_part_return_title,warning=True,blocking=True)
+  end
+  enter_critical
+  ft_insert_part_state=FT_INSERT_PART_STATE_IDLE
+  exit_critical
+  if ON_DEBUG_LOG:
+  textmsg("End of Insert Part.")
+  end
+  return ft_insert_part_return
+  end
+  ft_peakFzScanner_flag=False
+  ft_abs_Fz=0
+  ft_abs0_Fz=False
+  thread ft_peakFzScanner():
+  ft_peakFzScanner_flag=True
+  ft_abs_Fz=0
+  while(ft_peakFzScanner_flag==True):
+  local norm_Fz=norm(FT_Tool[2])
+  if(ft_abs0_Fz):
+  ft_abs_Fz=0
+  ft_abs0_Fz=False
+  elif(ft_abs_Fz<norm_Fz):
+  ft_abs_Fz=norm_Fz
+  end
+  sync()
+  end
+  end
+  ft_fpid_i_pin=0.0
+  ft_fpid_d_pin=0.0
+  ft_fpid_i_pin_default=0.0
+  ft_fpid_d_pin_default=0.0
+  ft_tpid_i_pin=0.0
+  ft_tpid_d_pin=0.0
+  ft_tpid_i_pin_default=0.0
+  ft_tpid_d_pin_default=0.0
+  def ft_pin_insertion(minDistZ,forceZ,compliance=[True,True,True,True,True,True],maxDistZ=0,expSpeed=0,deltaForce=1,timeOut=0,FTLimits=[999,999,0,999,999,999],PGainFxy=1.0,PGainFz=1.0,PGainTxy=0.2,PGainTz=0.2):
+  sync()
+  local pinRet=0
+  local frameID=1
+  local startPose=get_actual_tcp_pose()
+  if maxDistZ==0:
+  maxDistZ=minDistZ
+  end
+  local dist2Reach=maxDistZ
+  sync()
+  local selectThreshold=[False,False,False,False,False,False]
+  local ft_select=compliance
+  ft_select[2]=True
+  local ft_values=[0.0,0.0,0.0,0.0,0.0,0.0]
+  ft_values[2]=forceZ+0.0
+  local i=0
+  while(i<6):
+  selectThreshold[i]=not(ft_select[i])
+  i=i+1
+  end
+  local pin_useTimeOut=True
+  if timeOut==0:
+  pin_useTimeOut=False
+  end
+  local timeOut100ms=timeOut*10
+  local deltaD=expSpeed/10
+  ft_pin_currentDist=0
+  local peakScanner=run ft_peakFzScanner()
+  sync()
+  local pin_gainP=[PGainFxy,PGainFxy,PGainFz,PGainTxy,PGainTxy,PGainTz]
+  local pin_gainI=[ft_fpid_i_pin,ft_fpid_i_pin,ft_fpid_i_pin,ft_tpid_i_pin,ft_tpid_i_pin,ft_tpid_i_pin]
+  local pin_gainD=[ft_fpid_d_pin,ft_fpid_d_pin,ft_fpid_d_pin,ft_tpid_d_pin,ft_tpid_d_pin,ft_tpid_d_pin]
+  if on_hex:
+  on_xmlrpc.ft_sensor_filter(ft_sensor_filter_insertpart_hex)
+  end
+  ft_ftcontrol_start(ft_select=ft_select,ft_values=ft_values,frameID=frameID,frameRPY=[0,0,0],gainP=pin_gainP,gainI=pin_gainI,gainD=pin_gainD)
+  local cntr=0
+  local leaveInsertion=False
+  local bumpZeroPeak=True
+  local pin_actual_pose=get_actual_tcp_pose()
+  ft_pin_currentDist=point_dist(startPose,pin_actual_pose)
+  local pin_last_pose=pin_actual_pose
+  ft_actual_deltaD=deltaD
+  while((ft_pin_currentDist<dist2Reach)and not leaveInsertion):
+  on_wait_ms(100)
+  pin_actual_pose=get_actual_tcp_pose()
+  ft_pin_currentDist=point_dist(startPose,pin_actual_pose)
+  ft_actual_deltaD=(ft_actual_deltaD+pose_dist(pin_last_pose,pin_actual_pose))/2
+  if(ft_threshold_check(FTLimits,selectThreshold,True)):
+  leaveInsertion=True
+  if(ft_pin_currentDist<minDistZ):
+  pinRet=7
+  else:
+  pinRet=6
+  end
+  ft_ftcontrol_stop()
+  elif(pin_useTimeOut and(cntr>timeOut100ms)):
+  leaveInsertion=True
+  if(ft_pin_currentDist<minDistZ):
+  pinRet=5
+  else:
+  pinRet=4
+  end
+  ft_ftcontrol_stop()
+  elif(ft_actual_deltaD<deltaD and cntr>=10):
+  leaveInsertion=True
+  if(ft_pin_currentDist<minDistZ):
+  pinRet=3
+  ft_ftcontrol_stop()
+  else:
+  pinRet=2
+  end
+  elif(ft_pin_currentDist>=minDistZ):
+  if bumpZeroPeak:
+  bumpZeroPeak=False
+  ft_abs0_Fz=True
+  sync()
+  else:
+  if(ft_abs_Fz>norm(forceZ+deltaForce)and not ft_abs0_Fz):
+  ft_peakFzScanner_flag=False
+  leaveInsertion=True
+  pinRet=1
+  end
+  end
+  end
+  pin_last_pose=pin_actual_pose
+  cntr=cntr+1
+  sync()
+  end
+  ft_ftcontrol_stop()
+  on_xmlrpc.ft_sensor_filter(ft_sensor_filter)
+  ft_peakFzScanner_flag=False
+  kill peakScanner
+  ft_fpid_i_pin=ft_fpid_i_pin_default
+  ft_fpid_d_pin=ft_fpid_d_pin_default
+  ft_tpid_i_pin=ft_tpid_i_pin_default
+  ft_tpid_d_pin=ft_tpid_d_pin_default
+  return pinRet
+  end
+
+  #======    End of OnRobot FT Insert Part    ======#
+  # end: URCap Installation Node
+
+    rg_grip({}, {}, tool_index=0, blocking={}, depth_comp = {}, popupmsg=True)
+
+end

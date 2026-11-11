@@ -9,6 +9,8 @@ import sys
 os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 os.environ["MUJOCO_GL"] = "glfw" 
 os.environ["RICH_JUPYTER"] = "0"
+#os.environ["QT_DEBUG_PLUGINS"] = "1"
+os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH") # or os.environ(["QT_QPA_PLATFORM"]="offscreen"
 
 # Increase the default limit (usually 1000) to 10,000
 #sys.setrecursionlimit(10000) 
@@ -84,20 +86,24 @@ class SACAgentManager:
             self.model = SAC(
                 policy="MlpPolicy", 
                 env=self.env, 
+                learning_starts=1000,
                 verbose=1, 
                 tensorboard_log=self.log_dir
             )
         else:
+          # ./sac_eval_checkpoints/
+          # self.model = SAC.load("./sac_eval_checkpoints/nolook_envTv39_sac_eval_1880000_steps", env=self.env)
           self.model = SAC.load(self.modelpath, env=self.env)
 
         self.reward_callback = RewardComponentsCallback()
 
         # Configure the callback to only save the model weights
         self.checkpoint_callback = CheckpointCallback(
-            save_freq=20000,           # Save every 500,000 timesteps
+            save_freq=100000,           # Save every 500,000 timesteps
             save_path="./sac_eval_checkpoints/", 
             name_prefix=f"{self.name_p}_sac_eval",
-            save_replay_buffer=False   # Keeps file sizes small for manual evaluation
+            #save_vecnormalize=True,  # Don't save VecNormalize wrapper
+            #save_replay_buffer=True   # Keeps file sizes small for manual evaluation
         )
 
     def train(self, total_timesteps: int = 100_000, tb_log_name: str = f"sac_run_env", 
@@ -122,7 +128,7 @@ class SACAgentManager:
         self.model.save(save_path)
         print(f"Modell erfolgreich unter '{save_path}' gespeichert.")
 
-    def evaluate(self, eval_env: gym.Env, n_eval_episodes: int = 10):
+    def evaluate(self, eval_env: gym.Env, n_eval_episodes: int = 10, return_episode_rewards: bool = False):
         """
         Evaluiert die aktuelle Policy auf einer übergebenen Testumgebung.
         Es empfiehlt sich, hierfür eine frische Instanz der Custom Env zu nutzen.
@@ -136,11 +142,16 @@ class SACAgentManager:
             self.model, 
             eval_env_monitored, 
             n_eval_episodes=n_eval_episodes, 
-            deterministic=True
+            deterministic=True,
+            render=True,  # Setze render auf True, um die Umgebung während der Evaluation anzuzeigen
+            return_episode_rewards=return_episode_rewards  # Damit wir die Belohnungen pro Episode erhalten
         )
-        
-        print(f"Evaluationsergebnis:")
-        print(f" -> Mittlere Belohnung: {mean_reward:.2f} +/- {std_reward:.2f}")
+        if not return_episode_rewards:
+            print(f"Evaluationsergebnis:")
+            print(f" -> Mittlere Belohnung: {mean_reward:.2f}, +/- {std_reward:.2f}")
+        else:
+            print(f"Evaluationsergebnis:")
+            print(f" -> Mittlere Belohnung: {mean_reward}, +/- {std_reward}")
         
         eval_env_monitored.close()
         return mean_reward, std_reward
@@ -161,9 +172,10 @@ if __name__ == "__main__":
     # Wichtig: Da wir zwei separate Instanzen brauchen (eine fürs Training, eine für die Evaluation),
     # instanziieren wir deine Umgebung hier zweimal.
     gym.register(id="my_master_envs/ArmRobot-T31", entry_point="theEnv31:ArmRobot")
-    custom_train_env = gym.make("my_master_envs/ArmRobot-T31", qpos_noise=False, episode_len=200, num_points=20) #ArmRobot(render_mode="human")#
+    custom_train_env = gym.make("my_master_envs/ArmRobot-T31", start_target_idx=1, threshold_ori=1.5, ori_cost=0.5, qpos_noise=False, episode_len=200, num_points=20) #ArmRobot(render_mode="human")#
+    custom_eval_env = gym.make("my_master_envs/ArmRobot-T31", start_target_idx=1, threshold_ori=1.5, ori_cost=0.5, qpos_noise=False, episode_len=200, num_points=20) #ArmRobot(render_mode="human")#
     # custom_eval_env = gym.make("my_master_envs/ArmRobot-v2", render_mode="human") #ArmRobot(render_mode="human")#
-    #custom_eval_env.render_mode = "human"  # Setze den Render-Modus für die Evaluationsumgebung
+    # custom_eval_env.render_mode = "human"  # Setze den Render-Modus für die Evaluationsumgebung
     # assert custom_train_env is not custom_train_env, "Trainings- und Evaluationsumgebung müssen unterschiedliche Instanzen sein!"
     # assert custom_train_env.observation_space == custom_train_env.observation_space, "Beide Umgebungen müssen denselben Observation Space haben!"
     # assert custom_train_env.action_space == custom_train_env.action_space, "Beide Umgebungen müssen denselben Action Space haben!"
@@ -173,10 +185,10 @@ if __name__ == "__main__":
     # assert custom_train_env.current_pos is not None and custom_eval_env.current_pos is not None, "Beide Umgebungen müssen initialisierte Positionen haben! please check the reset_model() method in your ArmRobot class."
     # assert custom_train_env.current_target_pos is not None and custom_eval_env.current_target_pos is not None, "Beide Umgebungen müssen initialisierte Zielpositionen haben! Please check the reset_model() method in your ArmRobot class."
     # Manager mit der Instanz deiner Custom-Umgebung füttern
-    manager = SACAgentManager(train_env=custom_train_env,name_p="nolook_envTv33", loadmodel=False)
+    manager = SACAgentManager(train_env=custom_train_env,name_p="nolook_envTv36", loadmodel=True)
     
     # Trainieren
-    manager.train(total_timesteps=2_000_000, tb_log_name="nadel_envTv33_run")
+    # manager.train(total_timesteps=6_000_000, tb_log_name="nadel_envTv40_run")
     
     # Evaluieren mit der separaten Custom-Instanz
-    #manager.evaluate(eval_env=custom_eval_env, n_eval_episodes=5)
+    manager.evaluate(eval_env=custom_eval_env, n_eval_episodes=5, return_episode_rewards=True)
