@@ -149,7 +149,7 @@ from urx import *
 import vectorfunctions as vf
 # os.environ["DISPLAY"] = "0"
 # # os.environ["MUJOCO_GL"] = "egl"
-
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def save_episode_tracking_errors(
     cross_error_episodes,
@@ -278,16 +278,18 @@ def interpolate_joint_trajectory(q_start, q_goal, T, dt):
         trajectory.append(q)
 
     return np.array(trajectory)
+
 model_path = "sac_eval_checkpoints/nolook_envTv36_sac_eval_4000000_steps" 
-robot=True
+robot=False
 labels=False
+plot_ori=True
 # 2. Initialize the environment with human rendering
 # render_mode="human" automatically opens a window and renders each step, np.array([[-335 - 0.07], [-10 ], [+295 + 0.014]])
-env = ArmRobot(render_mode=None,ellipse_center_g=np.array([[-335], [-10 ], [+295]]), a=5,b=3,start_target_idx=1,ori_cost=1.5,threshold_pos=50e-6, threshold_ori=1.5, max_joint_delta=0.4, qpos_noise=False,episode_len=250, num_points=20, work_box_size=0.1)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
+env = ArmRobot(render_mode="human",ellipse_center_g=np.array([[-335], [-10 ], [+295]]), a=5,b=3,start_target_idx=1,ori_cost=1.5,threshold_pos=50e-6, threshold_ori=1.5, max_joint_delta=0.4, qpos_noise=False,episode_len=250, num_points=20, work_box_size=0.1)#null_threshold=1e-8, work_box_size=0.1, threshold_pos=50e-6, threshold_ori=1.5, start_target_idx=0, max_joint_delta = 3.0, render_mode=None, site_name="needle_holder_site", episode_len=250, num_points=20)
 if robot:
     rob1 = Robot("192.168.56.101")
     #rob1.set_gravity((0.0, + 9.81, 0.0))
-    rob1.movej((-0.38634197, -1.71695484, -1.15038477, -1.85402801,  1.55444177, -0.3969392), vel=1.0)
+    # rob1.movej((-0.38634197, -1.71695484, -1.15038477, -1.85402801,  1.55444177, -0.3969392), vel=1.0)
 
 #env._max_joint_delta[-1]=15
 #env = gym.make(env_name, render_mode="human")
@@ -301,7 +303,7 @@ print(f"Loading model from {model_path}...")
 model = SAC.load(os.path.abspath(model_path), env=env)
 best_action = False
 # 4. Evaluation Loop
-num_episodes = 10
+num_episodes = 1
 positions = []
 orientations = []
 orientations_int = []
@@ -313,12 +315,16 @@ frames = []
 
 episode_lengths = []
 episode_rewards = []
-mean_squared_errors = [] # list of MSE for each episode
-root_mean_squared_errors = [] # list of RMSE for each episode
 
+mean_squared_errors = [] # list of MSE for each episode position error
+root_mean_squared_errors = [] # list of RMSE for each episode position error
+mean_squared_errors_ori = [] # list of MSE for each episode orientation error
+root_mean_squared_errors_ori = [] # list of RMSE for each episode orientation error
 
-mean_squared_errors_rob = [] # list of MSE for each episode
-root_mean_squared_errors_rob = [] # list of RMSE for each episode
+mean_squared_errors_rob = [] # list of MSE for each episode robot's position error
+root_mean_squared_errors_rob = [] # list of RMSE for each episode robot's position error
+mean_squared_errors_ori_rob = [] # list of MSE for each episode robot's orientation error
+root_mean_squared_errors_ori_rob = [] # list of RMSE for each episode robot's orientation error
 
 positions_rob = []
 orientations_rob = []
@@ -334,7 +340,10 @@ for ep in range(num_episodes):
     if robot:
         #rob1 = Robot("192.168.56.101")
         #rob1.movej((-0.37626284, -1.71089287, -1.15919388, -1.85352342,  1.55074358, -0.37225355), vel=1.0, acc=0.5)
-        rob1.movej((-0.38634197, -1.71695484, -1.15038477, -1.85402801,  1.55444177, -0.3969392), vel=1.0, acc=0.5)
+        # rob1.movej((-0.38634197, -1.71695484, -1.15038477, -1.85402801,  1.55444177, -0.3969392), vel=1.0, acc=0.5)
+        startpose = env.init_qpos.copy()
+        #startpose[0] += 0.02
+        rob1.movej(startpose, vel=1.0, acc=0.5) 
         rob1_pos = np.array([float(rob1.x),float(rob1.y), float(rob1.z)])*1e3
         rob1_ori = np.array(rob1.get_orientation().matrix)
         print("rob1_pos: ", rob1_pos)
@@ -349,6 +358,7 @@ for ep in range(num_episodes):
     done = False
     truncated = False
     episode_reward = 0.0
+    episode_length = 0
     position = []
     orientation = []
     orientation_int = []
@@ -372,7 +382,7 @@ for ep in range(num_episodes):
         temp = (np.trace(R_err_r) - 1.0) / 2.0
         temp = np.clip(temp, -1.0, 1.0)  # Ensure the value is within the valid range for arccos
         orientation_int_rob.append(R_int_r)
-        cross_error_vec_rob.append(env.get_cross_error_vec_r(rob1_pos))
+        cross_error_vec_rob.append(np.linalg.norm(env.get_cross_error_vec_r(rob1_pos)))
         ori_error_rob.append(float(temp))
         
 
@@ -386,6 +396,7 @@ for ep in range(num_episodes):
         print(action)
         # Take a step in the environment
         obs, reward, done, truncated, info = env.step(action)
+        episode_length += 1
         print("obs env: ", obs)
         if robot:
             q_real = env.data.qpos.copy()
@@ -416,7 +427,7 @@ for ep in range(num_episodes):
             print("s: ", s_r)
             # sr_clip = np.clip(s_r, 0.0, 1.0)
             # p_proj = env.prev_target_pos + sr_clip * env.current_segment
-            cross_error_vec_r = env.get_cross_error_vec_r(rob1_pos)
+            cross_error_vec_r = np.linalg.norm(env.get_cross_error_vec_r(rob1_pos))
             #seg = np.array(segment)/np.linalg.norm(segment)
             # pos_err_vec_r = np.round(np.array(env.current_target_pos) - np.array(rob1_pos), 2)
 
@@ -551,17 +562,21 @@ for ep in range(num_episodes):
     # plot robot's path if robot is True
     if robot:
         ax1.plot3D(position_rob[:, 0], position_rob[:, 1], position_rob[:, 2], 'orange', linewidth=2)
-        ax1.scatter3D(position_rob[:, 0], position_rob[:, 1], position_rob[:, 2], 'orange', linewidth=2, label="Robot TCP Path")
+        #ax1.scatter3D(position_rob[:, 0], position_rob[:, 1], position_rob[:, 2], 'orange', linewidth=2, label="Robot TCP Path")
     if labels:
         for i in range(len(position)):
             ax1.text(position[i, 0], position[i, 1], position[i, 2], str(i), zdir='z', fontsize=8)
     #ax1.text3D(positions[:, 0], positions[:, 1], positions[:, 2], [str(i) for i in range(len(positions))], zdir='z', fontsize=8)
     ax1.plot3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2)
-    ax1.scatter3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2, label="Target TCP Path")
+    #ax1.scatter3D(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:], 'g', linewidth=2, label="Target TCP Path")
 
     # plot orientation vectors: current and target
-    # ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.3, label="TCP Orientation")
-    # ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp_int[0, :], O_tcp_int[1, :], O_tcp_int[2, :], color='black', length=0.3, label="TCP Orientation Target")
+    if plot_ori:
+        ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.5, arrow_length_ratio=0.1, label="TCP Orientation")
+        ax1.quiver(position[:, 0], position[:, 1], position[:, 2], O_tcp_int[0, :], O_tcp_int[1, :], O_tcp_int[2, :], color='black', length=0.5, arrow_length_ratio=0.1, label="TCP Orientation Target")
+        if robot:
+            ax1.quiver(position_rob[:, 0], position_rob[:, 1], position_rob[:, 2], O_tcp_rob[0, :], O_tcp_rob[1, :], O_tcp_rob[2, :], color='orange', length=0.3, arrow_length_ratio=0.1, label="Robot TCP Orientation")
+            ax1.quiver(position_rob[:, 0], position_rob[:, 1], position_rob[:, 2], O_tcp_int_rob[0, :], O_tcp_int_rob[1, :], O_tcp_int_rob[2, :], color='black', length=0.3, arrow_length_ratio=0.1, label="Robot TCP Orientation Target")
     #ax1.quiver(env.target_path[0, :], env.target_path[1,: ], env.target_path[ 2,:],env.target_tangent[0, :], env.target_tangent[1,: ], env.target_tangent[ 2,:], color='black', length=0.3)
     #
     # ax1 decorations
@@ -596,6 +611,10 @@ for ep in range(num_episodes):
     ax2.plot(list(range(len(cross_error_vec))), cross_error_vec, 'b', linewidth=2)
     ax2.scatter(list(range(len(cross_error_vec))), cross_error_vec, c='b', linewidth=2)
     ax2.plot(list(range(len(cross_error_vec))), [0.05]*len(cross_error_vec), 'r--', linewidth=1)
+    if robot:
+        ax2.plot(list(range(len(cross_error_vec_rob))), cross_error_vec_rob, 'orange', linewidth=2)
+        #ax2.scatter(list(range(len(cross_error_vec_rob))), cross_error_vec_rob, c='orange', linewidth=2)
+        ax2.plot(list(range(len(cross_error_vec_rob))), [0.05]*len(cross_error_vec_rob), 'r--', linewidth=1)
     if labels:
         for i in range(len(cross_error_vec)):
             ax2.text(i, cross_error_vec[i], f'{cross_error_vec[i]:.2f}', fontsize=8)
@@ -615,6 +634,10 @@ for ep in range(num_episodes):
     ax3.plot(list(range(len(theta_list))), theta_list, 'b', linewidth=2)
     ax3.scatter(list(range(len(theta_list))), theta_list, c='b', linewidth=2)
     ax3.plot(list(range(len(theta_list))), [1.5]*len(theta_list), 'r--', linewidth=1)
+    if robot:
+        ax3.plot(list(range(len(theta_list_rob))), theta_list_rob, 'orange', linewidth=2)
+        ax3.scatter(list(range(len(theta_list_rob))), theta_list_rob, c='orange', linewidth=2)
+        ax3.plot(list(range(len(theta_list_rob))), [1.5]*len(theta_list_rob), 'r--', linewidth=1)
     if labels:
         for i in range(len(theta_list)):
             ax3.text(i, theta_list[i], f'{theta_list[i]:.2f}', fontsize=8)
@@ -631,6 +654,16 @@ for ep in range(num_episodes):
     orientations.append(orientation.copy())
     cross_error_vecs.append(cross_error_vec.copy())
     ori_errors.append(ori_error.copy())
+    print("Ori: ", ori_error)
+    if robot:
+        positions_rob.append(position_rob.copy())
+        orientations_rob.append(orientation_rob.copy())
+        cross_error_vecs_rob.append(cross_error_vec_rob.copy())
+        ori_errors_rob.append(ori_error_rob.copy())
+    
+    episode_rewards.append(episode_reward)
+    episode_lengths.append(episode_length)
+
     print("List of best steps: ", env.best_actions_list)
     plt.tight_layout()
     plt.ion()
@@ -639,32 +672,63 @@ for ep in range(num_episodes):
     print(f"Saving test_envOne_ep{ep + 1}.mp4...")
     #imageio.mimsave(f"test_envOne_ep{ep + 1}.mp4", frames, fps=30)
 
-import matplotlib.pyplot as plt
-import numpy as np
-fig = plt.figure(figsize=(18, 6))
 
+mean_squared_errors = [np.mean(np.array(cross_error_vec)**2) for cross_error_vec in cross_error_vecs]
+root_mean_squared_errors = [np.sqrt(mse) for mse in mean_squared_errors]
+if robot:
+    mean_squared_errors_rob = [np.mean(np.array(cross_error_vec_rob)**2) for cross_error_vec_rob in cross_error_vecs_rob]
+    root_mean_squared_errors_rob = [np.sqrt(mse) for mse in mean_squared_errors_rob]
+
+mean_squared_errors_ori = [np.mean(np.array(ori_error)**2) for ori_error in ori_errors]
+root_mean_squared_errors_ori = [np.sqrt(mse) for mse in mean_squared_errors_ori]
+if robot:
+    mean_squared_errors_ori_rob = [np.mean(np.array(ori_error_rob)**2) for ori_error_rob in ori_errors_rob]
+    root_mean_squared_errors_ori_rob = [np.sqrt(mse) for mse in mean_squared_errors_ori_rob]
+
+fig = plt.figure(figsize=(18, 6))
 print(cross_error_vecs[0])
-ax2 = fig.add_subplot(1, 1, 1)#, projection='3d')
-ax2.plot(list(range(max([len(vec) for vec in cross_error_vecs]))), [0.05]*max([len(vec) for vec in cross_error_vecs]), 'r--', linewidth=3)
-for i, cross_error_vec in enumerate(cross_error_vecs):
-    #ax2.scatter(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1)
-    ax2.plot(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1, label=f'eps {i+1}')
+ax2 = fig.add_subplot(1, 2, 1)#, projection='3d')
+
+ax2.plot(list(range(len(mean_squared_errors))), mean_squared_errors, 'b', linewidth=2, label='MSE Agent')
+ax2.scatter(list(range(len(mean_squared_errors))), mean_squared_errors, 'b', linewidth=2)
+ax2.plot(list(range(len(root_mean_squared_errors))), root_mean_squared_errors, 'b--', linewidth=2, label='RMSE Agent')
+ax2.scatter(list(range(len(root_mean_squared_errors))), root_mean_squared_errors, 'b--', linewidth=2)
+
+if robot:
+    ax2.plot(list(range(len(mean_squared_errors_rob))), mean_squared_errors_rob, 'orange', linewidth=2, label='MSE Robot')
+    ax2.plot(list(range(len(root_mean_squared_errors_rob))), root_mean_squared_errors_rob, 'orange--', linewidth=2, label='RMSE Robot')
+
+ax3 = fig.add_subplot(1, 2, 2)#, projection='3d')
+ax3.plot(list(range(len(mean_squared_errors_ori))), mean_squared_errors_ori, 'b', linewidth=2, label='MSE Ori Agent')
+ax3.plot(list(range(len(root_mean_squared_errors_ori))), root_mean_squared_errors_ori, 'b--', linewidth=2, label='RMSE Ori Agent')
+ax2.boxplot(ori_errors)
+if robot:
+    ax3.plot(list(range(len(mean_squared_errors_ori_rob))), mean_squared_errors_ori_rob, 'orange', linewidth=2, label='MSE Ori Robot')
+    ax3.plot(list(range(len(root_mean_squared_errors_ori_rob))), root_mean_squared_errors_ori_rob, 'orange--', linewidth=2, label='RMSE Ori Robot')
+
+# ax2.plot(list(range(max([len(vec) for vec in cross_error_vecs]))), [0.05]*max([len(vec) for vec in cross_error_vecs]), 'r--', linewidth=3)
+# ax3.plot(list(range(max([len(vec) for vec in ori_errors]))), [1.5]*max([len(vec) for vec in ori_errors]), 'r--', linewidth=3)
+
+# for i, cross_error_vec in enumerate(cross_error_vecs):
+#     #ax2.scatter(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1)
+#     ax2.plot(list(range(len(cross_error_vec))), cross_error_vec, linewidth=1, label=f'eps {i+1}')
     
-    # for j in range(len(cross_error_vec)):
-    #     ax2.text(j, cross_error_vec[j], f'{cross_error_vec[j]:.2f}', fontsize=8)
-    #ax2.text(list(range(len(cross_error_vec))), cross_error_vec,[f'{x:.2f}' for x in cross_error_vec])
-    #ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.2)
-ax2.set_title('Target tcp cross error\n(base position)')
-ax2.set_xlabel('steps')
-ax2.set_ylabel('error(mm)')
+#     # for j in range(len(cross_error_vec)):
+#     #     ax2.text(j, cross_error_vec[j], f'{cross_error_vec[j]:.2f}', fontsize=8)
+#     #ax2.text(list(range(len(cross_error_vec))), cross_error_vec,[f'{x:.2f}' for x in cross_error_vec])
+#     #ax2.quiver(P_tcp[0, :], P_tcp[1, :], P_tcp[2, :], O_tcp[0, :], O_tcp[1, :], O_tcp[2, :], color='r', length=0.2)
+# ax2.set_title('Target tcp cross error\n(base position)')
+# ax2.set_xlabel('steps')
+# ax2.set_ylabel('error(mm)')
 #ax2.set_zlabel('z_tcp')
 ax2.grid(True)
+ax3.grid(True)
 plt.tight_layout()
 plt.ion()
 plt.legend()
 plt.show(block=True)    
 print(positions)
-print("Done! You can now watch test_env4.mp4")
+# print("Done! You can now watch test_env4.mp4")
 # 5. Clean up
 env.close()
 print("Testing complete.")

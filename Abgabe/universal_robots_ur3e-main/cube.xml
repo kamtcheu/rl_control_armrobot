@@ -1,0 +1,22 @@
+<mujoco model="visual cube">
+    <!-- Assets for background and materials -->
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="512" height="512"/>
+        <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 .2 .3" width="512" height="512"/>
+        <material name="matplane" texture="texplane" reflectance="0.5"/>
+        <material name="matcube" rgba="1 0 0 0.6"/> <!-- Semi-transparent red -->
+    </asset>
+
+    <worldbody>
+        <light directional="true" diffuse=".8 .8 .8" pos="0 0 10" dir="0 0 -1"/>
+        <geom name="floor" type="plane" pos="0 0 0" size="10 10 0.1" material="matplane"/>
+
+        <!-- A static, non-collidable visual cube at z = 1.0 meters -->
+        <body name="my_visual_cube" pos="0 0 1">
+            <!-- contype/conaffinity 0 ensures other objects pass right through it -->
+            <!-- group 1 allows you to toggle its visibility easily in the UI -->
+            <geom name="cube_geom" type="box" size="0.1 0.1 0.1" material="matcube" 
+                  contype="0" conaffinity="0" group="1"/>
+        </body>
+    </worldbody>
+</mujoco>

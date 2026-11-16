@@ -171,9 +171,11 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         # Strukturelle Offset startjoint: 
         # [-0.39834047, -1.7368403,  -1.14903885, -1.84659214,  1.56464244, -0.41421658, -0.02363703, -0.03026103]
         # -3.98074516e-01 -1.73658073e+00 -1.14930913e+00 -1.84654435e+00 1.56438704e+00 -4.13659315e-01
-        self.init_qpos = np.round(np.array([-0.38634197, -1.71695484, -1.15038477, -1.85402801,  1.55444177, -0.3969392 ]), 4)
+        self.init_qpos = np.round(np.array([-0.38635468, -1.71696724, -1.15038358, -1.85406297,  1.55444444, -0.39820217]), 4) # 5, 3 bei -0.48
+        #self.init_qpos = np.round(np.array([-0.40096669, -1.71891727, -1.14666347, -1.85896086,  1.5637397 , -0.41603536]), 4) # 8, 6 bei -0.48
         #self.init_qpos = np.round(np.array([-0.4430626,  -1.73563705, -0.94673805, -1.95636366,  1.62697667, -0.4984419]), 4)
-        #self.init_qpos = np.round(np.array([-0.37590172, -1.71870273, -1.15287911, -1.84531756,  1.54913177, -0.4105368]), 4) # 7, 5
+        # [-0.40257901, -1.72041437, -1.14562703, -1.85644467,  1.56617048, -0.4196923] ======= 7, 5
+        # self.init_qpos = np.round(np.array([-0.4009556 , -1.71753591, -1.14971301, -1.85420742,  1.56480088, -0.41885842]), 4) # 7, 5 bei -0.48
         # precomputed target trajectory and orientation of the TCP given in the base frame in mm ,ellipse_center_global=elipse_center_global
         _ , trajectory_in_base_frame = elliptical_trajectory(a=self.a, b=self.b, N=self.num_points, ellipse_center_global=self.ellipse_center_g, show_plot=False)
         self.target_path, self.target_tangent, self.target_binormal, self.target_normal = trajectory_in_base_frame
@@ -186,7 +188,7 @@ class ArmRobot(MujocoEnv, utils.EzPickle):
         self.max_wrist3_delta = np.ceil(np.rad2deg(np.arccos( self.target_tangent[:,0]@self.target_tangent[:,1])))
         print("wrist max dela: ", self.max_wrist3_delta)
         self._max_joint_delta[-1] = self.max_wrist3_delta
-        #self._max_joint_delta[-1] = 25 #1.0
+        # self._max_joint_delta[-1] = 25 #1.0
         # will be set at reset time to a point near the first point of the trajectory( for the moment,
         # it will be set to the first trajectory point later, but it can be set to a random point near the first trajectory point)
         # self.current_pos = None # np.array([self.target_path[0,0], self.target_path[1,0], self.target_path[2,0]])

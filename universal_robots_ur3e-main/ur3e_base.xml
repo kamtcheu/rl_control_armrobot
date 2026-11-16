@@ -64,11 +64,11 @@
 
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="wrist_3_link" pos="0 -1 2"/>
-    <body name="base" childclass="ur3e" pos="-0.40548 -0.25 0.555" euler="0 1.5708 1.5708">
+    <body name="base" childclass="ur3e" pos="-0.405 -0.25 0.555" euler="0 1.5708 1.5708">
       <inertial mass="2" pos="0 0 0" diaginertia="0.0030532 0.0030532 0.005625"/>
       <geom mesh="base_0" material="jointgray" class="visual"/>
       <geom mesh="base_1" material="black" class="visual"/>
-      <body name="shoulder_link" pos="0 0 0.15185" euler="0 0 3.14159">
+      <body name="shoulder_link" pos="0 0 0.15137" euler="0 0 3.14159">
         <inertial mass="1.98" pos="0 0 0" diaginertia="0.00809316 0.00809316 0.005625"/>
         <joint name="shoulder_pan_joint" class="size2" axis="0 0 1"/>
         <geom mesh="shoulder_0" material="urblue" class="visual"/>

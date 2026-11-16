@@ -1,11 +1,11 @@
 import time
-
+import numpy as np
 import mujoco
 import mujoco.viewer
-
+from trajectory import T_global2base
 m = mujoco.MjModel.from_xml_path('./universal_robots_ur3e-main/scene.xml')
 d = mujoco.MjData(m)
-
+d.qpos[:6] = np.array([-22.29,-99.53,-69.38,-41.45,31.13,346.29])* np.pi / 180
 with mujoco.viewer.launch_passive(m, d) as viewer:
   # Close the viewer automatically after 30 wall-seconds.
   start = time.time()
@@ -14,8 +14,23 @@ with mujoco.viewer.launch_passive(m, d) as viewer:
 
     # mj_step can be replaced with code that also evaluates
     # a policy and applies a control signal before stepping the physics.
-    mujoco.mj_step(m, d)
-
+    # d.qpos[:6] = np.array([-22.29,-99.53,-69.38,-41.45,31.13,346.29])* np.pi / 180
+    mujoco.mj_forward(m, d)
+    time.sleep(0.01)
+    print("x_pos_base:", T_global2base @ np.concatenate([d.site("needle_holder_site").xpos*1e3, [1]]) )
+    print("x_pose_global:", d.site("needle_holder_site").xpos*1e3)
+    j_0 = input("Enter joint angles in degrees (comma-separated) or 'q' to quit: ")
+    if j_0.lower() == 'q':
+        break
+    try:
+        j_0 = [float(angle) for angle in j_0.split(',')]
+        if len(j_0) != 6:
+            print("Please enter exactly 6 joint angles.")
+            continue
+        d.qpos[:6] = [angle * np.pi / 180 for angle in j_0]
+    except ValueError:
+        print("Invalid input. Please enter numeric values.")
+        continue
     # Example modification of a viewer option: toggle contact points every two seconds.
     with viewer.lock():
       viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = int(d.time % 2)
